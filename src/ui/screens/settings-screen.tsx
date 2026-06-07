@@ -228,7 +228,12 @@ export function SettingsScreen({ name, onReset, onOpenAiLab, onOpenLanguage }: P
         ]}
       >
         <PixelIcon name="egg" size={ICON_SIZE.md} color={armed ? PLASTIC.cream : theme.inkSoft} />
-        <Text style={[styles.resetText, { color: armed ? PLASTIC.cream : theme.inkSoft }]}>
+        <Text
+          style={[styles.resetText, { color: armed ? PLASTIC.cream : theme.inkSoft }]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}
+        >
           {armed ? t('settings.resetArmed', { name }) : t('settings.reset')}
         </Text>
       </Pressable>
@@ -335,10 +340,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: SPACING.sm,
     paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
     borderRadius: SURF_RADIUS,
     borderWidth: BORDER_WIDTH.regular,
   },
   resetText: {
+    flexShrink: 1,
+    textAlign: 'center',
     fontFamily: FONTS.uiHeavy,
     fontSize: FONT_SIZE.button,
   },

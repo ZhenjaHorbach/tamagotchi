@@ -11,6 +11,7 @@ import { ChunkyButton } from '@/ui/components/chunky-button';
 import { Habitat } from '@/ui/components/habitat';
 import { Nameplate } from '@/ui/components/nameplate';
 import { PetSlot } from '@/ui/components/pet-slot';
+import { hashSeed } from '@/render/sprite-gen';
 import { SpeechBubble } from '@/ui/components/speech-bubble';
 import { StatGauge } from '@/ui/components/stat-gauge';
 import { usePetName } from '@/ai/personality-store';
@@ -67,7 +68,7 @@ export default function HabitatScreen() {
       />
 
       <Habitat>
-        <PetSlot mood={mood} />
+        <PetSlot mood={mood} seed={hashSeed(name)} />
       </Habitat>
 
       <View style={[surfaces.panel, styles.statRow]}>

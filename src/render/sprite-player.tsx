@@ -1,63 +1,40 @@
-import {
-  Canvas,
-  FilterMode,
-  Group,
-  Image as SkiaImage,
-  MipmapMode,
-  rect,
-  useImage,
-} from '@shopify/react-native-skia';
-import { useEffect, useState } from 'react';
-import { View } from 'react-native';
+// Live pixel-art pet. Builds the four animation frames procedurally from the
+// pet's seed (unique look per creature) and plays them on a Skia canvas with
+// crisp, nearest-neighbor-style rects — no sprite sheet, no image loading.
+
+import { Canvas, Rect } from '@shopify/react-native-skia';
+import { useEffect, useMemo, useState } from 'react';
 
 import type { Mood } from '@/core';
 
-const SHEET = require('@/assets/sprites/pet-sheet.png');
+import { dnaFromSeed, FRAME, FRAMES, spriteCells } from './sprite-gen';
 
-export const FRAME_SIZE = 16;
-export const FRAME_COUNT = 4;
 const FPS = 5;
 
-/** mood → sprite-sheet row (clip) */
-export const MOOD_CLIP: Record<Mood, number> = {
-  happy: 0,
-  neutral: 1,
-  sad: 2,
-  sleepy: 3,
-  hungry: 4,
-};
+type Props = { mood: Mood; seed: number; size?: number };
 
-const MOOD_ROWS = Object.keys(MOOD_CLIP).length;
-
-type Props = { mood: Mood; size?: number };
-
-export function SpritePlayer({ mood, size = 98 }: Props) {
-  const image = useImage(SHEET);
+export function SpritePlayer({ mood, seed, size = 98 }: Props) {
   const [frame, setFrame] = useState(0);
 
-  // frame loop on a clock
+  const dna = useMemo(() => dnaFromSeed(seed), [seed]);
+  // precompute all four frames' cells per (mood, dna); the tick only swaps index
+  const frames = useMemo(
+    () => Array.from({ length: FRAMES }, (_, f) => spriteCells(mood, f, dna)),
+    [mood, dna],
+  );
+
   useEffect(() => {
-    const id = setInterval(() => setFrame((f) => (f + 1) % FRAME_COUNT), 1000 / FPS);
+    const id = setInterval(() => setFrame((f) => (f + 1) % FRAMES), 1000 / FPS);
     return () => clearInterval(id);
   }, []);
 
-  if (!image) return <View style={{ width: size, height: size }} />;
-
-  const row = MOOD_CLIP[mood];
+  const cell = size / FRAME;
   return (
-    <Canvas style={{ width: size, height: size }}>
-      {/* clip to one frame; slide the full sheet so the wanted cell shows */}
-      <Group clip={rect(0, 0, size, size)}>
-        <SkiaImage
-          image={image}
-          x={-frame * size}
-          y={-row * size}
-          width={FRAME_COUNT * size}
-          height={MOOD_ROWS * size}
-          fit="fill"
-          sampling={{ filter: FilterMode.Nearest, mipmap: MipmapMode.None }}
-        />
-      </Group>
+    <Canvas style={{ width: size, height: size }} pointerEvents="none">
+      {frames[frame].map((c, i) => (
+        // 1.02 overlap avoids hairline seams between pixels
+        <Rect key={i} x={c.x * cell} y={c.y * cell} width={cell * 1.02} height={cell * 1.02} color={c.color} />
+      ))}
     </Canvas>
   );
 }

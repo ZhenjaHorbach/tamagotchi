@@ -114,7 +114,14 @@ function HardwareButton({ icon, label, onPress, active, disabled }: HardwareActi
           />
         </View>
       </View>
-      <Text style={[styles.hwLabel, { color: PLASTIC.brand }]}>{label.toUpperCase()}</Text>
+      <Text
+        style={[styles.hwLabel, { color: PLASTIC.brand }]}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}
+      >
+        {label.toUpperCase()}
+      </Text>
     </Pressable>
   );
 }
@@ -269,12 +276,13 @@ const styles = StyleSheet.create({
   },
   hwRow: {
     flexDirection: 'row',
-    gap: SPACING.xl,
+    gap: SPACING.sm,
   },
   hw: {
+    width: 76,
     alignItems: 'center',
     gap: SPACING.xs,
-    padding: SPACING.xxs,
+    paddingVertical: SPACING.xxs,
   },
   hwDisabled: {
     opacity: 0.4,
@@ -311,7 +319,8 @@ const styles = StyleSheet.create({
     borderWidth: BORDER_WIDTH.bold,
   },
   hwLabel: {
-    // Pixelify (not Silkscreen): tab captions are translated and need Cyrillic
+    width: '100%',
+    textAlign: 'center',
     fontFamily: FONTS.display,
     fontSize: FONT_SIZE.pixelLg,
     letterSpacing: LETTER_SPACING.tight,

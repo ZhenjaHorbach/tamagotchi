@@ -36,7 +36,7 @@ function Zzz() {
   );
 }
 
-export function PetSlot({ mood }: { mood: Mood }) {
+export function PetSlot({ mood, seed }: { mood: Mood; seed: number }) {
   const theme = useTheme();
   const asleep = mood === 'sleepy';
   const t = useSharedValue(0);
@@ -68,7 +68,7 @@ export function PetSlot({ mood }: { mood: Mood }) {
         <RadialBg colors={[theme.glow, fadeOut(theme.glow)]} radius={0.5} positions={[0, 0.66]} />
       </View>
       <Animated.View style={bob}>
-        <SpritePlayer mood={mood} size={SIZE} />
+        <SpritePlayer mood={mood} seed={seed} size={SIZE} />
         {asleep && <Zzz />}
       </Animated.View>
       <Animated.View style={[styles.shadow, shadow]} />

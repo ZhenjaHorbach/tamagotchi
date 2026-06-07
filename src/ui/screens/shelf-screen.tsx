@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Mood } from '@/core';
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
+import { hashSeed } from '@/render/sprite-gen';
 import { SpritePlayer } from '@/render/sprite-player';
 import { LinearBg, RadialBg } from '@/ui/components/gradient-bg';
 import {
@@ -46,7 +47,7 @@ function PetDome({ name, mood, onPress }: { name: string; mood: Mood; onPress: (
             <LinearBg colors={[theme.floor, theme.floorEdge]} />
           </View>
           <View style={styles.domePet}>
-            <SpritePlayer mood={mood} size={50} />
+            <SpritePlayer mood={mood} seed={hashSeed(name)} size={50} />
           </View>
           <View style={styles.shine} />
         </View>

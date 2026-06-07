@@ -16,11 +16,12 @@ import Animated, {
 
 import type { Personality } from '@/ai/personality';
 import { PixelIcon } from '@/render/pixel-icon';
+import { hashSeed } from '@/render/sprite-gen';
 import { SpritePlayer } from '@/render/sprite-player';
+import { Egg } from '@/ui/components/egg';
 import { RadialBg } from '@/ui/components/gradient-bg';
 import { ThinkingCue } from '@/ui/components/speech-bubble';
 import {
-  BORDER_WIDTH,
   fadeOut,
   FONT_SIZE,
   FONTS,
@@ -32,12 +33,6 @@ import {
 } from '@/ui/theme';
 
 const TAPS_TO_HATCH = 4;
-
-// egg shape geometry (kept as named constants, like the dome/window widths)
-const EGG_W = 122;
-const EGG_H = 152;
-const EGG_R_TOP = 58;
-const EGG_R_BOTTOM = 56;
 
 type Phase = 'egg' | 'burst' | 'reveal';
 
@@ -103,13 +98,8 @@ export function HatchScreen({ card, onReveal, onComplete }: Props) {
           <Text style={[styles.kicker, { color: theme.inkSoft }]}>{t('hatch.firstLight')}</Text>
 
           <Pressable onPress={tap}>
-            <Animated.View
-              style={[styles.egg, { backgroundColor: theme.bubbleBg, borderColor: theme.panelLine }, eggStyle]}
-            >
-              <View style={[styles.eggShine]} />
-              {cracks >= 1 && <View style={[styles.crack, styles.crack1, { backgroundColor: theme.inkSoft }]} />}
-              {cracks >= 2 && <View style={[styles.crack, styles.crack2, { backgroundColor: theme.inkSoft }]} />}
-              {cracks >= 3 && <View style={[styles.crack, styles.crack3, { backgroundColor: theme.inkSoft }]} />}
+            <Animated.View style={eggStyle}>
+              <Egg cracks={cracks} />
             </Animated.View>
           </Pressable>
 
@@ -165,7 +155,7 @@ function Reveal({ card, onComplete }: { card: Personality | null; onComplete: ()
       </Animated.View>
 
       <Animated.View style={popStyle}>
-        <SpritePlayer mood="happy" size={108} />
+        <SpritePlayer mood="happy" seed={hashSeed(card?.name ?? '')} size={108} />
       </Animated.View>
 
       <Text style={[styles.meet, { color: theme.inkSoft }]}>{t('hatch.meet')}</Text>
@@ -224,33 +214,6 @@ const styles = StyleSheet.create({
     letterSpacing: LETTER_SPACING.wide,
     textTransform: 'uppercase',
   },
-  egg: {
-    width: EGG_W,
-    height: EGG_H,
-    borderWidth: BORDER_WIDTH.regular,
-    borderTopLeftRadius: EGG_R_TOP,
-    borderTopRightRadius: EGG_R_TOP,
-    borderBottomLeftRadius: EGG_R_BOTTOM,
-    borderBottomRightRadius: EGG_R_BOTTOM,
-    overflow: 'hidden',
-  },
-  eggShine: {
-    position: 'absolute',
-    top: '16%',
-    left: '22%',
-    width: 24,
-    height: 32,
-    borderRadius: RADIUS.lg,
-    backgroundColor: 'rgba(255,255,255,0.5)',
-  },
-  crack: {
-    position: 'absolute',
-    width: 2,
-    opacity: 0.5,
-  },
-  crack1: { left: '50%', top: '14%', height: 36, transform: [{ rotate: '8deg' }] },
-  crack2: { left: '42%', top: '30%', height: 30, transform: [{ rotate: '-14deg' }] },
-  crack3: { left: '60%', top: '24%', height: 34, transform: [{ rotate: '20deg' }] },
   hint: {
     fontFamily: FONTS.uiBold,
     fontSize: FONT_SIZE.button,
