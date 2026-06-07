@@ -9,7 +9,16 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
-import { BTN_EDGE_H, BTN_RADIUS, FONT_SIZE, FONTS, ICON_SIZE, shared, SPACING, type ButtonTone } from '@/ui/theme';
+import {
+  BTN_EDGE_H,
+  BTN_RADIUS,
+  FONT_SIZE,
+  FONTS,
+  ICON_SIZE,
+  shared,
+  SPACING,
+  type ButtonTone,
+} from '@/ui/theme';
 
 type Props = {
   label: string;
@@ -29,7 +38,8 @@ export function ChunkyButton({ icon, label, tone, onPress, disabled }: Props) {
       onPress={onPress}
       disabled={disabled}
       onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}>
+      onPressOut={() => setPressed(false)}
+    >
       {/* the edge the face sinks into: face shape, shifted BTN_EDGE_H down */}
       <View style={[styles.edge, { backgroundColor: tone.edge }]} />
       <View
@@ -38,7 +48,8 @@ export function ChunkyButton({ icon, label, tone, onPress, disabled }: Props) {
           icon ? styles.faceTall : styles.faceCompact,
           { backgroundColor: tone.face },
           { transform: [{ translateY: down ? BTN_EDGE_H : 0 }] },
-        ]}>
+        ]}
+      >
         {icon && <PixelIcon name={icon} size={ICON_SIZE.lg} color={tone.ink} />}
         <Text style={[styles.label, { color: tone.ink }]}>{label}</Text>
       </View>

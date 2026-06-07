@@ -1,9 +1,19 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text } from 'react-native';
 
 import type { Mood } from '@/core';
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
-import { FONT_SIZE, FONTS, ICON_SIZE, LETTER_SPACING, MOOD_META, SPACING, useSurfaces, useTheme } from '@/ui/theme';
+import {
+  FONT_SIZE,
+  FONTS,
+  ICON_SIZE,
+  LETTER_SPACING,
+  MOOD_META,
+  SPACING,
+  useSurfaces,
+  useTheme,
+} from '@/ui/theme';
 
 type Props = {
   name: string;
@@ -12,6 +22,7 @@ type Props = {
 };
 
 export function Nameplate({ name, mood, onPress }: Props) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const surfaces = useSurfaces();
   const meta = MOOD_META[mood];
@@ -22,12 +33,14 @@ export function Nameplate({ name, mood, onPress }: Props) {
         surfaces.panel,
         styles.row,
         pressed && { backgroundColor: theme.accentSoft },
-      ]}>
+      ]}
+    >
       <Text style={[styles.name, { color: theme.ink }]} numberOfLines={1}>
         {name}
         {'  '}
         <Text style={[styles.mood, { color: theme.inkSoft }]}>
-          <PixelIcon name={meta.glyph as IconName} size={ICON_SIZE.sm} color={theme.accent} /> {meta.label}
+          <PixelIcon name={meta.glyph as IconName} size={ICON_SIZE.sm} color={theme.accent} />{' '}
+          {t(`mood.${mood}.label`)}
         </Text>
       </Text>
       <Text style={[styles.id, { color: theme.inkFaint }]}>

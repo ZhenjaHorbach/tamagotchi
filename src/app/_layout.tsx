@@ -1,4 +1,5 @@
 import '@/ai/init';
+import '@/i18n';
 import { Stack } from 'expo-router';
 
 import { useAppFonts } from '@/hooks/use-app-fonts';

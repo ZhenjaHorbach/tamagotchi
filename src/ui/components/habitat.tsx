@@ -45,7 +45,11 @@ function Star({ x, y, index }: { x: number; y: number; index: number }) {
   const style = useAnimatedStyle(() => ({ opacity: o.value }));
   return (
     <Animated.View style={[{ position: 'absolute', left: `${x}%`, top: `${y}%` }, style]}>
-      <PixelIcon name="star" size={index % 3 === 0 ? ICON_SIZE.sm : ICON_SIZE.xs} color={theme.inkSoft} />
+      <PixelIcon
+        name="star"
+        size={index % 3 === 0 ? ICON_SIZE.sm : ICON_SIZE.xs}
+        color={theme.inkSoft}
+      />
     </Animated.View>
   );
 }
@@ -54,7 +58,10 @@ function Raindrop({ x, index }: { x: number; index: number }) {
   const theme = useTheme();
   const t = useSharedValue(0);
   useEffect(() => {
-    t.value = withDelay(index * 220, withRepeat(withTiming(1, { duration: 1400, easing: Easing.linear }), -1));
+    t.value = withDelay(
+      index * 220,
+      withRepeat(withTiming(1, { duration: 1400, easing: Easing.linear }), -1),
+    );
   }, [index, t]);
   const style = useAnimatedStyle(() => ({
     transform: [{ translateY: -10 + t.value * 110 }],

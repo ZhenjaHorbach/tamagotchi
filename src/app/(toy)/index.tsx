@@ -2,6 +2,7 @@
 
 import { useFocusEffect } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
 import { deriveMood } from '@/core';
@@ -17,6 +18,7 @@ import { useSpeech } from '@/ui/use-speech';
 import { buttonTones, gaugeTones, SPACING, useSurfaces } from '@/ui/theme';
 
 export default function HabitatScreen() {
+  const { t } = useTranslation();
   const surfaces = useSurfaces();
   const pet = usePetStore((s) => s.pet);
   const feed = usePetStore((s) => s.feed);
@@ -70,15 +72,15 @@ export default function HabitatScreen() {
       <View style={[surfaces.panel, styles.statRow]}>
         <StatGauge
           icon="bowl"
-          label="Hunger"
+          label={t('habitat.hunger')}
           value={fullness}
           tone={gauges.hunger}
           alert={pet.hunger > 75}
         />
-        <StatGauge icon="heart" label="Joy" value={pet.joy} tone={gauges.joy} />
+        <StatGauge icon="heart" label={t('habitat.joy')} value={pet.joy} tone={gauges.joy} />
         <StatGauge
           icon="bolt"
-          label="Energy"
+          label={t('habitat.energy')}
           value={pet.energy}
           tone={gauges.energy}
           alert={pet.energy < 20}
@@ -88,7 +90,7 @@ export default function HabitatScreen() {
       <View style={styles.actions}>
         <ChunkyButton
           icon="bowl"
-          label="Feed"
+          label={t('habitat.feed')}
           tone={buttons.feed}
           onPress={() => {
             feed();
@@ -97,7 +99,7 @@ export default function HabitatScreen() {
         />
         <ChunkyButton
           icon="ball"
-          label="Play"
+          label={t('habitat.play')}
           tone={buttons.play}
           disabled={tooTired}
           onPress={() => {
@@ -107,7 +109,7 @@ export default function HabitatScreen() {
         />
         <ChunkyButton
           icon="moon"
-          label="Sleep"
+          label={t('habitat.sleep')}
           tone={buttons.sleep}
           onPress={() => {
             sleep();

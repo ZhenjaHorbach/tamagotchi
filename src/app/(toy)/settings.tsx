@@ -18,6 +18,7 @@ export default function SettingsRoute() {
         router.replace('/'); // habitat greets the newborn on focus
       }}
       onOpenAiLab={() => router.push('/ai-lab')}
+      onOpenLanguage={() => router.push('/language')}
     />
   );
 }

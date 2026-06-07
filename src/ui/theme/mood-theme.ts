@@ -5,14 +5,13 @@ import { DEFAULT_PALETTE, type Palette } from './palettes';
 
 export type Celestial = 'sun' | 'cloud' | 'rain' | 'moon';
 
-export type MoodMeta = { label: string; glyph: string; tagline: string };
-
-export const MOOD_META: Record<Mood, MoodMeta> = {
-  happy: { label: 'Content', glyph: 'sun', tagline: 'basking' },
-  neutral: { label: 'Calm', glyph: 'leaf', tagline: 'pottering about' },
-  sad: { label: 'Lonely', glyph: 'rain', tagline: 'a little blue' },
-  sleepy: { label: 'Sleepy', glyph: 'moon', tagline: 'dozing off' },
-  hungry: { label: 'Peckish', glyph: 'bowl', tagline: 'tummy rumbling' },
+/** Mood glyphs; the labels/taglines live in the locale files (i18n). */
+export const MOOD_META: Record<Mood, { glyph: string }> = {
+  happy: { glyph: 'sun' },
+  neutral: { glyph: 'leaf' },
+  sad: { glyph: 'rain' },
+  sleepy: { glyph: 'moon' },
+  hungry: { glyph: 'bowl' },
 };
 
 export type Theme = {
@@ -222,9 +221,15 @@ export function gaugeTones(P: Palette = DEFAULT_PALETTE) {
 
 export type ButtonTone = { face: string; edge: string; ink: string };
 
-export function buttonTones(P: Palette = DEFAULT_PALETTE): Record<'feed' | 'play' | 'sleep', ButtonTone> {
+export function buttonTones(
+  P: Palette = DEFAULT_PALETTE,
+): Record<'feed' | 'play' | 'sleep', ButtonTone> {
   return {
-    feed: { face: P.gold, edge: adj(P.gold, { dl: -0.15, ds: 0.05 }), ink: adj(P.ink, { dl: 0.02 }) },
+    feed: {
+      face: P.gold,
+      edge: adj(P.gold, { dl: -0.15, ds: 0.05 }),
+      ink: adj(P.ink, { dl: 0.02 }),
+    },
     play: { face: P.olive, edge: adj(P.olive, { dl: -0.14 }), ink: adj(P.cream, { dl: 0.07 }) },
     sleep: {
       face: adj(P.ink, { dl: 0.19, ds: -0.08 }),

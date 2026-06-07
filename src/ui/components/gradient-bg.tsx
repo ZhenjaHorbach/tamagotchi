@@ -1,6 +1,12 @@
 import { Canvas, LinearGradient, RadialGradient, Rect, vec } from '@shopify/react-native-skia';
 import { useState } from 'react';
-import { StyleSheet, View, type LayoutChangeEvent, type StyleProp, type ViewStyle } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  type LayoutChangeEvent,
+  type StyleProp,
+  type ViewStyle,
+} from 'react-native';
 
 type BaseProps = {
   colors: string[];

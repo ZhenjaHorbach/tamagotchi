@@ -13,7 +13,12 @@ module.exports = defineConfig([
     // Node build scripts
     files: ['scripts/**/*.js'],
     languageOptions: {
-      globals: { Buffer: 'readonly', __dirname: 'readonly', process: 'readonly', console: 'readonly' },
+      globals: {
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        process: 'readonly',
+        console: 'readonly',
+      },
     },
   },
 ]);

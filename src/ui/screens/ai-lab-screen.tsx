@@ -3,6 +3,7 @@
 // the pet uses, so the whole voice pipeline is exercised end to end.
 
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { MODEL_LABEL, usePetLlm } from '@/ai/use-pet-llm';
@@ -51,6 +52,7 @@ type Props = {
 };
 
 export function AiLabScreen({ name, onBack }: Props) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const surfaces = useSurfaces();
   const llm = usePetLlm();
@@ -66,21 +68,22 @@ export function AiLabScreen({ name, onBack }: Props) {
   };
 
   const status = llm.error
-    ? 'model failed to load'
+    ? t('ailab.statusError')
     : downloading
       ? llm.downloadProgress > 0
-        ? `fetching the little mind… ${Math.round(llm.downloadProgress * 100)}%`
-        : 'waking the little mind…'
+        ? t('ailab.statusFetching', { pct: Math.round(llm.downloadProgress * 100) })
+        : t('ailab.statusWaking')
       : llm.generating
-        ? 'thinking…'
-        : 'on-device · ready';
+        ? t('ailab.statusThinking')
+        : t('ailab.statusReady');
 
   return (
     <ScrollView
       style={styles.root}
       contentContainerStyle={styles.content}
       showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled">
+      keyboardShouldPersistTaps="handled"
+    >
       <View style={styles.topbar}>
         <Pressable
           onPress={onBack}
@@ -88,9 +91,10 @@ export function AiLabScreen({ name, onBack }: Props) {
             shared.row,
             styles.back,
             pressed && { backgroundColor: theme.panel },
-          ]}>
+          ]}
+        >
           <PixelIcon name="chevL" size={ICON_SIZE.sm} color={theme.inkSoft} />
-          <Text style={[styles.backText, { color: theme.inkSoft }]}> Settings</Text>
+          <Text style={[styles.backText, { color: theme.inkSoft }]}> {t('common.settings')}</Text>
         </Pressable>
         <Text style={[shared.pixelLabel, styles.title, { color: theme.inkSoft }]}>AI&nbsp;LAB</Text>
         <PixelIcon name="sparkle" size={ICON_SIZE.sm} color={theme.accent} />
@@ -110,7 +114,7 @@ export function AiLabScreen({ name, onBack }: Props) {
         style={[styles.input, surfaces.field, { color: theme.ink }]}
         value={input}
         onChangeText={setInput}
-        placeholder={`ask ${name.toLowerCase()} anything…`}
+        placeholder={t('ailab.placeholder', { name })}
         placeholderTextColor={theme.inkFaint}
         multiline
         editable={llm.ready && !llm.generating}
@@ -118,7 +122,12 @@ export function AiLabScreen({ name, onBack }: Props) {
       />
 
       <View style={styles.buttons}>
-        <ChunkyButton label="Ask" tone={surfaces.accentTone} onPress={ask} disabled={!canAsk} />
+        <ChunkyButton
+          label={t('ailab.ask')}
+          tone={surfaces.accentTone}
+          onPress={ask}
+          disabled={!canAsk}
+        />
         <Pressable
           onPress={llm.interrupt}
           disabled={!llm.generating}
@@ -126,8 +135,9 @@ export function AiLabScreen({ name, onBack }: Props) {
             styles.stop,
             { borderColor: theme.panelLine },
             !llm.generating && shared.disabled,
-          ]}>
-          <Text style={[styles.stopText, { color: theme.inkSoft }]}>Stop</Text>
+          ]}
+        >
+          <Text style={[styles.stopText, { color: theme.inkSoft }]}>{t('ailab.stop')}</Text>
         </Pressable>
       </View>
 

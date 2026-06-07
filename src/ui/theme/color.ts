@@ -1,5 +1,7 @@
 function hx(n: number): string {
-  return Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, '0');
+  return Math.max(0, Math.min(255, Math.round(n)))
+    .toString(16)
+    .padStart(2, '0');
 }
 
 function parse(hex: string): [number, number, number] {
@@ -94,7 +96,10 @@ export function fadeOut(color: string): string {
 }
 
 /** Adjust hue / saturation / lightness deltas of a hex color. */
-export function adj(hex: string, { dh = 0, ds = 0, dl = 0 }: { dh?: number; ds?: number; dl?: number } = {}): string {
+export function adj(
+  hex: string,
+  { dh = 0, ds = 0, dl = 0 }: { dh?: number; ds?: number; dl?: number } = {},
+): string {
   const [h, s, l] = toHsl(parse(hex));
   return fromHsl(h + dh, Math.max(0, Math.min(1, s + ds)), Math.max(0, Math.min(1, l + dl)));
 }

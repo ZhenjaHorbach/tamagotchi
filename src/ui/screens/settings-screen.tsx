@@ -1,10 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
-import { BORDER_WIDTH, FONT_SIZE, FONTS, ICON_SIZE, PLASTIC, RADIUS, shared, SPACING, SURF_RADIUS, useSurfaces, useTheme } from '@/ui/theme';
+import {
+  BORDER_WIDTH,
+  FONT_SIZE,
+  FONTS,
+  ICON_SIZE,
+  PLASTIC,
+  RADIUS,
+  shared,
+  SPACING,
+  SURF_RADIUS,
+  useSurfaces,
+  useTheme,
+} from '@/ui/theme';
 
 function PixToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   const theme = useTheme();
@@ -16,7 +29,8 @@ function PixToggle({ value, onChange }: { value: boolean; onChange: (v: boolean)
   return (
     <Pressable
       onPress={() => onChange(!value)}
-      style={[styles.toggle, { backgroundColor: value ? theme.accent : theme.track }]}>
+      style={[styles.toggle, { backgroundColor: value ? theme.accent : theme.track }]}
+    >
       <Animated.View style={[styles.toggleKnob, { backgroundColor: PLASTIC.cream }, knob]} />
     </Pressable>
   );
@@ -63,9 +77,12 @@ type Props = {
   onReset: () => void;
   /** opens the AI Lab — talk to the on-device model directly */
   onOpenAiLab?: () => void;
+  /** opens the language screen */
+  onOpenLanguage?: () => void;
 };
 
-export function SettingsScreen({ name, onReset, onOpenAiLab }: Props) {
+export function SettingsScreen({ name, onReset, onOpenAiLab, onOpenLanguage }: Props) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const surfaces = useSurfaces();
   const [notif, setNotif] = useState(true);
@@ -96,18 +113,20 @@ export function SettingsScreen({ name, onReset, onOpenAiLab }: Props) {
     <ScrollView
       style={styles.root}
       contentContainerStyle={styles.content}
-      showsVerticalScrollIndicator={false}>
-      <Text style={[styles.head, { color: theme.ink }]}>Settings</Text>
+      showsVerticalScrollIndicator={false}
+    >
+      <Text style={[styles.head, { color: theme.ink }]}>{t('settings.title')}</Text>
 
       <View style={[surfaces.panel, styles.privacy, { backgroundColor: theme.accentSoft }]}>
         <View style={[surfaces.iconBox, styles.privacyIco]}>
           <PixelIcon name="shield" size={ICON_SIZE.lg} color={theme.accent} />
         </View>
         <View style={styles.privacyBody}>
-          <Text style={[styles.privacyTitle, { color: theme.ink }]}>Everything runs on your device</Text>
+          <Text style={[styles.privacyTitle, { color: theme.ink }]}>
+            {t('settings.privacyTitle')}
+          </Text>
           <Text style={[styles.privacySub, { color: theme.inkSoft }]}>
-            {name}’s mind, memories and replies never leave this phone. No account, no cloud — it
-            works in airplane mode.
+            {t('settings.privacyBody', { name })}
           </Text>
         </View>
       </View>
@@ -115,16 +134,16 @@ export function SettingsScreen({ name, onReset, onOpenAiLab }: Props) {
       <View style={[surfaces.panel, styles.group]}>
         <SetToggleRow
           icon="bell"
-          title="Reminders"
-          sub={`let ${name.toLowerCase()} nudge you when it’s peckish`}
+          title={t('settings.reminders')}
+          sub={t('settings.remindersSub', { name })}
           value={notif}
           onChange={setNotif}
         />
         <View style={[styles.divider, { backgroundColor: theme.panelLine }]} />
         <SetToggleRow
           icon="sound"
-          title="Sound & haptics"
-          sub="little chirps and gentle taps"
+          title={t('settings.sound')}
+          sub={t('settings.soundSub')}
           value={sound}
           onChange={setSound}
         />
@@ -133,11 +152,14 @@ export function SettingsScreen({ name, onReset, onOpenAiLab }: Props) {
       <View style={[surfaces.panel, styles.group]}>
         <Pressable
           style={({ pressed }) => [styles.row, pressed && { backgroundColor: theme.accentSoft }]}
-          onPress={() => setAbout((a) => !a)}>
+          onPress={() => setAbout((a) => !a)}
+        >
           <RowIcon name="sparkle" />
           <View style={styles.rowMain}>
-            <Text style={[styles.rowTitle, { color: theme.ink }]}>How {name} thinks</Text>
-            <Text style={[styles.rowSub, { color: theme.inkSoft }]}>about the little on-device mind</Text>
+            <Text style={[styles.rowTitle, { color: theme.ink }]}>
+              {t('settings.how', { name })}
+            </Text>
+            <Text style={[styles.rowSub, { color: theme.inkSoft }]}>{t('settings.howSub')}</Text>
           </View>
           <View style={{ transform: [{ rotate: about ? '90deg' : '0deg' }] }}>
             <PixelIcon name="chevR" size={ICON_SIZE.sm} color={theme.inkFaint} />
@@ -146,9 +168,7 @@ export function SettingsScreen({ name, onReset, onOpenAiLab }: Props) {
         {about && (
           <View style={[styles.about, { borderTopColor: theme.panelLine }]}>
             <Text style={[styles.aboutText, { color: theme.inkSoft }]}>
-              {name}’s personality and replies are dreamed up by a small language model running
-              entirely on your phone. The more time you spend together, the more it settles into
-              its own little self — and none of it is ever uploaded.
+              {t('settings.aboutText', { name })}
             </Text>
           </View>
         )}
@@ -156,13 +176,40 @@ export function SettingsScreen({ name, onReset, onOpenAiLab }: Props) {
           <>
             <View style={[styles.divider, { backgroundColor: theme.panelLine }]} />
             <Pressable
-              style={({ pressed }) => [styles.row, pressed && { backgroundColor: theme.accentSoft }]}
-              onPress={onOpenAiLab}>
+              style={({ pressed }) => [
+                styles.row,
+                pressed && { backgroundColor: theme.accentSoft },
+              ]}
+              onPress={onOpenAiLab}
+            >
               <RowIcon name="scan" />
               <View style={styles.rowMain}>
-                <Text style={[styles.rowTitle, { color: theme.ink }]}>AI Lab</Text>
+                <Text style={[styles.rowTitle, { color: theme.ink }]}>{t('settings.aiLab')}</Text>
                 <Text style={[styles.rowSub, { color: theme.inkSoft }]}>
-                  talk to the little mind directly
+                  {t('settings.aiLabSub')}
+                </Text>
+              </View>
+              <PixelIcon name="chevR" size={ICON_SIZE.sm} color={theme.inkFaint} />
+            </Pressable>
+          </>
+        )}
+        {onOpenLanguage && (
+          <>
+            <View style={[styles.divider, { backgroundColor: theme.panelLine }]} />
+            <Pressable
+              style={({ pressed }) => [
+                styles.row,
+                pressed && { backgroundColor: theme.accentSoft },
+              ]}
+              onPress={onOpenLanguage}
+            >
+              <RowIcon name="globe" />
+              <View style={styles.rowMain}>
+                <Text style={[styles.rowTitle, { color: theme.ink }]}>
+                  {t('settings.language')}
+                </Text>
+                <Text style={[styles.rowSub, { color: theme.inkSoft }]}>
+                  {t('settings.languageSub', { name })}
                 </Text>
               </View>
               <PixelIcon name="chevR" size={ICON_SIZE.sm} color={theme.inkFaint} />
@@ -178,10 +225,11 @@ export function SettingsScreen({ name, onReset, onOpenAiLab }: Props) {
           armed
             ? { backgroundColor: theme.accent, borderColor: 'transparent' }
             : { backgroundColor: theme.panel, borderColor: theme.panelLine },
-        ]}>
+        ]}
+      >
         <PixelIcon name="egg" size={ICON_SIZE.md} color={armed ? PLASTIC.cream : theme.inkSoft} />
         <Text style={[styles.resetText, { color: armed ? PLASTIC.cream : theme.inkSoft }]}>
-          {armed ? `tap again — this says goodbye to ${name}` : 'Reset & hatch a new pet'}
+          {armed ? t('settings.resetArmed', { name }) : t('settings.reset')}
         </Text>
       </Pressable>
 

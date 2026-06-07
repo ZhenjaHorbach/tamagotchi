@@ -11,7 +11,16 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { PixelIcon } from '@/render/pixel-icon';
-import { BORDER_WIDTH, FONT_SIZE, FONTS, ICON_SIZE, LETTER_SPACING, RADIUS, SPACING, useTheme } from '@/ui/theme';
+import {
+  BORDER_WIDTH,
+  FONT_SIZE,
+  FONTS,
+  ICON_SIZE,
+  LETTER_SPACING,
+  RADIUS,
+  SPACING,
+  useTheme,
+} from '@/ui/theme';
 
 function ThinkingDot({ delay, color }: { delay: number; color: string }) {
   const t = useSharedValue(0);
@@ -49,7 +58,10 @@ function Caret({ color }: { color: string }) {
   const on = useSharedValue(1);
   useEffect(() => {
     on.value = withRepeat(
-      withSequence(withTiming(1, { duration: 500, easing: Easing.steps(1) }), withTiming(0, { duration: 500, easing: Easing.steps(1) })),
+      withSequence(
+        withTiming(1, { duration: 500, easing: Easing.steps(1) }),
+        withTiming(0, { duration: 500, easing: Easing.steps(1) }),
+      ),
       -1,
     );
   }, [on]);
@@ -76,7 +88,8 @@ export function SpeechBubble({ name, shown, done, thinking }: Props) {
             borderColor: theme.bubbleLine,
             shadowColor: theme.panelDeep,
           },
-        ]}>
+        ]}
+      >
         <View style={styles.nameRow}>
           <PixelIcon name="sparkle" size={ICON_SIZE.sm} color={theme.accent} />
           <Text style={[styles.name, { color: theme.accent }]}>{name.toLowerCase()}</Text>
@@ -94,10 +107,7 @@ export function SpeechBubble({ name, shown, done, thinking }: Props) {
       </View>
       {/* tail */}
       <View
-        style={[
-          styles.tail,
-          { backgroundColor: theme.bubbleBg, borderColor: theme.bubbleLine },
-        ]}
+        style={[styles.tail, { backgroundColor: theme.bubbleBg, borderColor: theme.bubbleLine }]}
       />
     </View>
   );

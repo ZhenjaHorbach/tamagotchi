@@ -1,8 +1,9 @@
 // The toy shell is the shared layout: the room, the plastic handheld and its
 // three chin-button tabs persist while routes swap inside the inset screen.
 
-import { Slot, usePathname, useRouter } from 'expo-router';
+import { Stack, usePathname, useRouter } from 'expo-router';
 import { useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
@@ -11,11 +12,33 @@ import { deriveMood } from '@/core';
 import { usePetStore } from '@/state/pet-store';
 import { RadialBg } from '@/ui/components/gradient-bg';
 import { ToyFrame, TOY_WIDTH } from '@/ui/components/toy-frame';
-import { LETTER_SPACING, MOOD_META, moodTheme, shared, SPACING, ThemeProvider } from '@/ui/theme';
+import { FONT_SIZE, FONTS, LETTER_SPACING, moodTheme, SPACING, ThemeProvider } from '@/ui/theme';
 
 const TOY_NATURAL_HEIGHT = 716;
 
+// Habitat is the anchor: cold start, reload and "back" all resolve here, so a
+// Fast-Refresh never strands you on a pushed sub-screen (language / AI Lab).
+export const unstable_settings = { initialRouteName: 'index' };
+
+// tabs replace the current route (no stacking); sub-screens push (so "back"
+// returns to the tab). `navigate` dedupes, so tab→tab→tab never piles up.
+const TABS = [
+  { id: 'home', icon: 'home', path: '/shelf' },
+  { id: 'habitat', icon: 'dome', path: '/' },
+  { id: 'settings', icon: 'cog', path: '/settings' },
+] as const;
+
+// which tab is highlighted for a given route (sub-screens map to their parent)
+const TAB_FOR_PATH: Record<string, string> = {
+  '/shelf': '/shelf',
+  '/': '/',
+  '/settings': '/settings',
+  '/ai-lab': '/settings',
+  '/language': '/settings',
+};
+
 export default function ToyLayout() {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const pet = usePetStore((s) => s.pet);
@@ -32,7 +55,7 @@ export default function ToyLayout() {
     1.06,
   );
 
-  const onSettings = pathname === '/settings' || pathname === '/ai-lab';
+  const activeTab = TAB_FOR_PATH[pathname] ?? '/';
 
   return (
     <ThemeProvider value={theme}>
@@ -41,32 +64,24 @@ export default function ToyLayout() {
         <RadialBg colors={[theme.room1, theme.room2]} center={{ x: 0.5, y: 0.08 }} radius={1.1} />
         <View style={{ transform: [{ scale }] }}>
           <ToyFrame
-            hw={[
-              {
-                icon: 'home',
-                label: 'home',
-                onPress: () => router.replace('/shelf'),
-                active: pathname === '/shelf',
-              },
-              {
-                icon: 'dome',
-                label: 'habitat',
-                onPress: () => router.replace('/'),
-                active: pathname === '/',
-              },
-              {
-                icon: 'cog',
-                label: 'settings',
-                onPress: () => router.replace('/settings'),
-                active: onSettings,
-              },
-            ]}>
-            {pet ? <Slot /> : null}
+            hw={TABS.map((tab) => ({
+              icon: tab.icon,
+              id: tab.id,
+              label: t(`nav.${tab.id}`),
+              onPress: () => router.navigate(tab.path),
+              active: activeTab === tab.path,
+            }))}
+          >
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                animation: 'none',
+                contentStyle: { backgroundColor: 'transparent' },
+              }}
+            />
           </ToyFrame>
         </View>
-        <Text style={[shared.pixelLabel, styles.tagline, { color: theme.inkFaint }]}>
-          {MOOD_META[mood].tagline}
-        </Text>
+        <Text style={[styles.tagline, { color: theme.inkFaint }]}>{t(`mood.${mood}.tagline`)}</Text>
       </View>
     </ThemeProvider>
   );
@@ -81,6 +96,10 @@ const styles = StyleSheet.create({
   tagline: {
     position: 'absolute',
     bottom: SPACING.lg,
+    // Pixelify (not Silkscreen): the tagline is translated and needs Cyrillic
+    fontFamily: FONTS.display,
+    fontSize: FONT_SIZE.pixelLg,
     letterSpacing: LETTER_SPACING.wide,
+    textTransform: 'uppercase',
   },
 });

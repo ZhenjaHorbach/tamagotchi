@@ -11,7 +11,12 @@ type Props = {
   style?: StyleProp<ViewStyle>;
 };
 
-export const PixelIcon = memo(function PixelIcon({ name, size = 16, color = '#000', style }: Props) {
+export const PixelIcon = memo(function PixelIcon({
+  name,
+  size = 16,
+  color = '#000',
+  style,
+}: Props) {
   const bm = BITMAPS[name];
   const rows = bm.length;
   const cols = bm[0].length;
@@ -27,7 +32,14 @@ export const PixelIcon = memo(function PixelIcon({ name, size = 16, color = '#00
     <Canvas style={[{ width: size, height }, style]} pointerEvents="none">
       {rects.map((r, i) => (
         // 1.04 cell overlap avoids hairline seams between pixels
-        <Rect key={i} x={r.x * cell} y={r.y * cell} width={cell * 1.04} height={cell * 1.04} color={color} />
+        <Rect
+          key={i}
+          x={r.x * cell}
+          y={r.y * cell}
+          width={cell * 1.04}
+          height={cell * 1.04}
+          color={color}
+        />
       ))}
     </Canvas>
   );

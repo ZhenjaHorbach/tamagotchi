@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Mood } from '@/core';
@@ -5,21 +6,41 @@ import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
 import { SpritePlayer } from '@/render/sprite-player';
 import { LinearBg, RadialBg } from '@/ui/components/gradient-bg';
-import { BORDER_WIDTH, fadeOut, FONT_SIZE, FONTS, ICON_SIZE, RADIUS, MOOD_META, shared, SPACING, useSurfaces, useTheme } from '@/ui/theme';
+import {
+  BORDER_WIDTH,
+  fadeOut,
+  FONT_SIZE,
+  FONTS,
+  ICON_SIZE,
+  RADIUS,
+  MOOD_META,
+  shared,
+  SPACING,
+  useSurfaces,
+  useTheme,
+} from '@/ui/theme';
 
 const DOME_W = 128;
 const DOME_H = 126;
 
 function PetDome({ name, mood, onPress }: { name: string; mood: Mood; onPress: () => void }) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const meta = MOOD_META[mood];
   return (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.dome, pressed && styles.domePressed]}>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => [styles.dome, pressed && styles.domePressed]}
+    >
       <View style={styles.glass}>
         <View style={styles.glassInner}>
           <LinearBg colors={[theme.screen1, theme.screen2]} />
           <View style={styles.domeGlow}>
-            <RadialBg colors={[theme.glow, fadeOut(theme.glow)]} radius={0.5} positions={[0, 0.64]} />
+            <RadialBg
+              colors={[theme.glow, fadeOut(theme.glow)]}
+              radius={0.5}
+              positions={[0, 0.64]}
+            />
           </View>
           <View style={styles.domeFloor}>
             <LinearBg colors={[theme.floor, theme.floorEdge]} />
@@ -36,7 +57,8 @@ function PetDome({ name, mood, onPress }: { name: string; mood: Mood; onPress: (
       <View style={styles.plate}>
         <Text style={[styles.name, { color: theme.ink }]}>{name}</Text>
         <Text style={[styles.moodText, { color: theme.inkSoft }]}>
-          <PixelIcon name={meta.glyph as IconName} size={ICON_SIZE.sm} color={theme.accent} /> {meta.label.toLowerCase()}
+          <PixelIcon name={meta.glyph as IconName} size={ICON_SIZE.sm} color={theme.accent} />{' '}
+          {t(`mood.${mood}.label`).toLowerCase()}
         </Text>
       </View>
     </Pressable>
@@ -44,6 +66,7 @@ function PetDome({ name, mood, onPress }: { name: string; mood: Mood; onPress: (
 }
 
 function EmptyDome() {
+  const { t } = useTranslation();
   const theme = useTheme();
   return (
     <View style={styles.dome}>
@@ -54,9 +77,9 @@ function EmptyDome() {
       </View>
       <View style={[styles.cork, { backgroundColor: theme.panelLine, opacity: 0.7 }]} />
       <View style={styles.plate}>
-        <Text style={[styles.name, { color: theme.inkFaint }]}>empty</Text>
+        <Text style={[styles.name, { color: theme.inkFaint }]}>{t('shelf.empty')}</Text>
         <Text style={[styles.moodText, { color: theme.inkFaint }]}>
-          <PixelIcon name="plus" size={ICON_SIZE.xs} color={theme.inkFaint} /> hatch one
+          <PixelIcon name="plus" size={ICON_SIZE.xs} color={theme.inkFaint} /> {t('shelf.hatchOne')}
         </Text>
       </View>
     </View>
@@ -70,14 +93,15 @@ type Props = {
 };
 
 export function ShelfScreen({ name, mood, onEnterPet }: Props) {
+  const { t } = useTranslation();
   const theme = useTheme();
   const surfaces = useSurfaces();
   return (
     <View style={styles.root}>
       <View style={styles.head}>
         <View>
-          <Text style={[styles.title, { color: theme.ink }]}>Your pocket</Text>
-          <Text style={[styles.sub, { color: theme.inkSoft }]}>one little creature, and room for more</Text>
+          <Text style={[styles.title, { color: theme.ink }]}>{t('shelf.title')}</Text>
+          <Text style={[styles.sub, { color: theme.inkSoft }]}>{t('shelf.sub')}</Text>
         </View>
         <View style={[shared.row, surfaces.panel, styles.count]}>
           <PixelIcon name="dome" size={ICON_SIZE.sm} color={theme.accent} />
@@ -91,7 +115,10 @@ export function ShelfScreen({ name, mood, onEnterPet }: Props) {
           <View style={styles.plank} pointerEvents="none">
             <LinearBg colors={[theme.floor, theme.floorEdge]} style={styles.plankBg} />
           </View>
-          <View style={[styles.plankShadow, { backgroundColor: theme.floorEdge }]} pointerEvents="none" />
+          <View
+            style={[styles.plankShadow, { backgroundColor: theme.floorEdge }]}
+            pointerEvents="none"
+          />
 
           <PetDome name={name} mood={mood} onPress={onEnterPet} />
           <EmptyDome />
@@ -100,7 +127,7 @@ export function ShelfScreen({ name, mood, onEnterPet }: Props) {
 
       <View style={styles.foot}>
         <PixelIcon name="moon" size={ICON_SIZE.sm} color={theme.inkFaint} />
-        <Text style={[styles.footText, { color: theme.inkFaint }]}> every creature lives on this device</Text>
+        <Text style={[styles.footText, { color: theme.inkFaint }]}> {t('shelf.footer')}</Text>
       </View>
     </View>
   );

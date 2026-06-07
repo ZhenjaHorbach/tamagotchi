@@ -11,7 +11,19 @@ import Animated, {
 
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
-import { BEZEL_RADIUS, BORDER_WIDTH, FONT_SIZE, FONTS, ICON_SIZE, LETTER_SPACING, PLASTIC, RADIUS, SPACING, TOY_RADIUS, useTheme } from '@/ui/theme';
+import {
+  BEZEL_RADIUS,
+  BORDER_WIDTH,
+  FONT_SIZE,
+  FONTS,
+  ICON_SIZE,
+  LETTER_SPACING,
+  PLASTIC,
+  RADIUS,
+  SPACING,
+  TOY_RADIUS,
+  useTheme,
+} from '@/ui/theme';
 import { LinearBg } from '@/ui/components/gradient-bg';
 
 export const TOY_WIDTH = 412;
@@ -29,7 +41,11 @@ function Led() {
     );
   }, [o]);
   const style = useAnimatedStyle(() => ({ opacity: o.value }));
-  return <Animated.View style={[styles.led, { backgroundColor: PLASTIC.led, shadowColor: PLASTIC.led }, style]} />;
+  return (
+    <Animated.View
+      style={[styles.led, { backgroundColor: PLASTIC.led, shadowColor: PLASTIC.led }, style]}
+    />
+  );
 }
 
 function Screw({ corner }: { corner: 'tl' | 'tr' | 'bl' | 'br' }) {
@@ -54,6 +70,9 @@ function Grille() {
 
 export type HardwareAction = {
   icon: IconName;
+  /** stable identity for React keys (not shown) */
+  id: string;
+  /** visible, already-localized caption */
   label: string;
   onPress: () => void;
   active?: boolean;
@@ -70,7 +89,8 @@ function HardwareButton({ icon, label, onPress, active }: HardwareAction) {
       style={styles.hw}
       onPress={onPress}
       onPressIn={() => setPressed(true)}
-      onPressOut={() => setPressed(false)}>
+      onPressOut={() => setPressed(false)}
+    >
       {/* same scheme as ChunkyButton: edge sits KNOB_EDGE_H below the knob,
           pressing slides the knob down onto it — nothing peeks out */}
       <View style={styles.knobBox}>
@@ -80,10 +100,15 @@ function HardwareButton({ icon, label, onPress, active }: HardwareAction) {
             styles.knob,
             { backgroundColor: PLASTIC.toy1 },
             { transform: [{ translateY: pressed ? KNOB_EDGE_H : 0 }] },
-          ]}>
+          ]}
+        >
           {/* active ring drawn outside the knob, never affects layout */}
           {active && <View style={[styles.knobRing, { borderColor: theme.accent }]} />}
-          <PixelIcon name={icon} size={ICON_SIZE.md} color={active ? theme.accent : PLASTIC.knobInk} />
+          <PixelIcon
+            name={icon}
+            size={ICON_SIZE.md}
+            color={active ? theme.accent : PLASTIC.knobInk}
+          />
         </View>
       </View>
       <Text style={[styles.hwLabel, { color: PLASTIC.brand }]}>{label.toUpperCase()}</Text>
@@ -137,7 +162,7 @@ export function ToyFrame({ children, hw, badge }: Props) {
         <Grille />
         <View style={styles.hwRow}>
           {hw.map((b) => (
-            <HardwareButton key={b.label} {...b} />
+            <HardwareButton key={b.id} {...b} />
           ))}
         </View>
         <Grille />
@@ -280,8 +305,9 @@ const styles = StyleSheet.create({
     borderWidth: BORDER_WIDTH.bold,
   },
   hwLabel: {
-    fontFamily: FONTS.pixel,
-    fontSize: FONT_SIZE.pixel,
+    // Pixelify (not Silkscreen): tab captions are translated and need Cyrillic
+    fontFamily: FONTS.display,
+    fontSize: FONT_SIZE.pixelLg,
     letterSpacing: LETTER_SPACING.tight,
   },
 });

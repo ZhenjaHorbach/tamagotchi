@@ -9,7 +9,10 @@ type Options = {
 
 type Tape = { key: string; n: number };
 
-export function useTypewriter(text: string, { speed = 30, active = true, startDelay = 0, gen = 0 }: Options = {}) {
+export function useTypewriter(
+  text: string,
+  { speed = 30, active = true, startDelay = 0, gen = 0 }: Options = {},
+) {
   const key = `${gen}:${text}`;
   const [tape, setTape] = useState<Tape>({ key, n: active ? 0 : text.length });
 
