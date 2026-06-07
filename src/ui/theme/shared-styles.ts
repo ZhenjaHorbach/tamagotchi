@@ -33,6 +33,7 @@ export const FONT_SIZE = {
   speech: 18, // the pet's voice
   title: 20, // nameplate
   display: 24, // screen headings
+  hero: 40, // the hatch reveal name — a one-off big moment
 } as const;
 
 export const LETTER_SPACING = {

@@ -14,6 +14,18 @@ const MODEL = models.llm.qwen3_1_7b();
 /** Model id straight from the library config, shown in the AI Lab. */
 export const MODEL_LABEL = MODEL.modelName;
 
+/** Generation settings (model default temperature is 0.6). */
+export type GenConfig = {
+  temperature?: number;
+  topP?: number;
+  repetitionPenalty?: number;
+};
+
+// Higher temperature + topP → more varied, original in-character replies.
+export const REPLY_CONFIG: GenConfig = { temperature: 1.0, topP: 0.95, repetitionPenalty: 1.1 };
+// Lower temperature → the birth JSON parses reliably (still some name/quirk flair).
+export const PERSONALITY_CONFIG: GenConfig = { temperature: 0.7, topP: 0.9 };
+
 export type GenMetrics = {
   /** ms from generate() to the first streamed token */
   ttftMs: number | null;
@@ -38,7 +50,7 @@ type LlmStore = {
   /** Download (once) and load the model. Safe to call repeatedly. */
   load: () => Promise<void>;
   /** Stream a reply for a single user prompt. Resolves with the full text. */
-  generate: (prompt: string) => Promise<string | null>;
+  generate: (prompt: string, config?: GenConfig) => Promise<string | null>;
   interrupt: () => void;
 };
 
@@ -80,11 +92,12 @@ export const useLlmStore = create<LlmStore>((set, get) => ({
     }
   },
 
-  generate: async (prompt: string) => {
+  generate: async (prompt: string, config?: GenConfig) => {
     if (!llm || get().generating) return null;
     timing = { startedAt: Date.now(), firstTokenAt: 0, tokens: 0 };
     set({ generating: true, rawResponse: '', metrics: EMPTY_METRICS });
     try {
+      if (config) llm.configure({ generationConfig: config });
       const text = await llm.generate([{ role: 'user', content: prompt }]);
       const totalMs = Date.now() - timing.startedAt;
       const genMs = timing.firstTokenAt ? Date.now() - timing.firstTokenAt : totalMs;

@@ -3,10 +3,11 @@
 
 import { useRouter } from 'expo-router';
 
-import { PET_NAME } from '@/ui/pet-identity';
+import { usePetName } from '@/ai/personality-store';
 import { AiLabScreen } from '@/ui/screens/ai-lab-screen';
 
 export default function AiLabRoute() {
   const router = useRouter();
-  return <AiLabScreen name={PET_NAME} onBack={() => router.back()} />;
+  const name = usePetName();
+  return <AiLabScreen name={name} onBack={() => router.back()} />;
 }

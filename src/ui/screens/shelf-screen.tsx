@@ -65,11 +65,23 @@ function PetDome({ name, mood, onPress }: { name: string; mood: Mood; onPress: (
   );
 }
 
-function EmptyDome() {
+// `onPress` omitted when a pet already exists (slot is a future affordance).
+// `large` blows it up for the centered "no pet yet" state.
+function EmptyDome({ onPress, large }: { onPress?: () => void; large?: boolean }) {
   const { t } = useTranslation();
   const theme = useTheme();
+  const disabled = !onPress;
   return (
-    <View style={styles.dome}>
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      style={({ pressed }) => [
+        styles.dome,
+        large && styles.domeLarge,
+        disabled && styles.domeFaded,
+        pressed && styles.domePressed,
+      ]}
+    >
       <View style={[styles.glass, { backgroundColor: theme.panelLine }]}>
         <View style={[styles.glassInner, styles.glassEmpty, { backgroundColor: theme.panel }]}>
           <PixelIcon name="egg" size={ICON_SIZE.xl} color={theme.inkFaint} />
@@ -82,17 +94,19 @@ function EmptyDome() {
           <PixelIcon name="plus" size={ICON_SIZE.xs} color={theme.inkFaint} /> {t('shelf.hatchOne')}
         </Text>
       </View>
-    </View>
+    </Pressable>
   );
 }
 
 type Props = {
-  name: string;
-  mood: Mood;
+  pet: { name: string; mood: Mood } | null;
   onEnterPet: () => void;
+  onAdopt: () => void;
 };
 
-export function ShelfScreen({ name, mood, onEnterPet }: Props) {
+export function ShelfScreen({ pet, onEnterPet, onAdopt }: Props) {
+  // hatching is only offered when the slot is free (one-pet MVP)
+  const canAdopt = !pet;
   const { t } = useTranslation();
   const theme = useTheme();
   const surfaces = useSurfaces();
@@ -105,24 +119,20 @@ export function ShelfScreen({ name, mood, onEnterPet }: Props) {
         </View>
         <View style={[shared.row, surfaces.panel, styles.count]}>
           <PixelIcon name="dome" size={ICON_SIZE.sm} color={theme.accent} />
-          <Text style={[styles.countText, { color: theme.inkSoft }]}> 1</Text>
+          <Text style={[styles.countText, { color: theme.inkSoft }]}> {pet ? 1 : 0}</Text>
         </View>
       </View>
 
       <View style={styles.stage}>
-        <View style={styles.row}>
-          {/* shelf planks */}
-          <View style={styles.plank} pointerEvents="none">
-            <LinearBg colors={[theme.floor, theme.floorEdge]} style={styles.plankBg} />
+        {pet ? (
+          <View style={styles.row}>
+            <PetDome name={pet.name} mood={pet.mood} onPress={onEnterPet} />
+            <EmptyDome />
           </View>
-          <View
-            style={[styles.plankShadow, { backgroundColor: theme.floorEdge }]}
-            pointerEvents="none"
-          />
-
-          <PetDome name={name} mood={mood} onPress={onEnterPet} />
-          <EmptyDome />
-        </View>
+        ) : (
+          // no pet yet → a single, larger inviting dome to hatch one
+          <EmptyDome onPress={canAdopt ? onAdopt : undefined} large />
+        )}
       </View>
 
       <View style={styles.foot}>
@@ -173,39 +183,17 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: SPACING.lg,
     paddingHorizontal: SPACING.xs,
-    paddingBottom: SPACING.xxl,
-  },
-  plank: {
-    position: 'absolute',
-    left: -4,
-    right: -4,
-    top: DOME_H + 1,
-    height: 17,
-    borderRadius: RADIUS.xs,
-    shadowColor: '#000',
-    shadowOpacity: 0.22,
-    shadowRadius: 14,
-    shadowOffset: { width: 0, height: 9 },
-  },
-  plankBg: {
-    borderRadius: RADIUS.xs,
-    overflow: 'hidden',
-  },
-  plankShadow: {
-    position: 'absolute',
-    left: 20,
-    right: 20,
-    top: DOME_H + 100,
-    height: 12,
-    borderRadius: RADIUS.xs,
-    opacity: 0.34,
   },
   dome: {
     width: 138,
     alignItems: 'center',
   },
+  domeLarge: {},
   domePressed: {
     transform: [{ translateY: -2 }],
+  },
+  domeFaded: {
+    opacity: 0.55,
   },
   glass: {
     width: DOME_W,
@@ -221,7 +209,7 @@ const styles = StyleSheet.create({
   },
   glassInner: {
     flex: 1,
-    margin: 2,
+    margin: SPACING.xxs,
     borderTopLeftRadius: DOME_W / 2 - 2,
     borderTopRightRadius: DOME_W / 2 - 2,
     borderBottomLeftRadius: RADIUS.lg,

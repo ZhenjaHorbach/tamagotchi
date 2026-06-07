@@ -76,18 +76,21 @@ export type HardwareAction = {
   label: string;
   onPress: () => void;
   active?: boolean;
+  /** dimmed and unresponsive (e.g. during the no-pet hatch flow) */
+  disabled?: boolean;
 };
 
 const KNOB_SIZE = 42;
 const KNOB_EDGE_H = 3;
 
-function HardwareButton({ icon, label, onPress, active }: HardwareAction) {
+function HardwareButton({ icon, label, onPress, active, disabled }: HardwareAction) {
   const theme = useTheme();
   const [pressed, setPressed] = useState(false);
   return (
     <Pressable
-      style={styles.hw}
+      style={[styles.hw, disabled && styles.hwDisabled]}
       onPress={onPress}
+      disabled={disabled}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}
     >
@@ -200,7 +203,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: SPACING.sm,
-    paddingTop: 2,
+    paddingTop: SPACING.xxs,
     paddingBottom: SPACING.sm,
   },
   brand: {
@@ -271,7 +274,10 @@ const styles = StyleSheet.create({
   hw: {
     alignItems: 'center',
     gap: SPACING.xs,
-    padding: 2,
+    padding: SPACING.xxs,
+  },
+  hwDisabled: {
+    opacity: 0.4,
   },
   knobBox: {
     width: KNOB_SIZE,

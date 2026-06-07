@@ -10,6 +10,11 @@ const SCHEMA = `
     last_seen_at INTEGER NOT NULL,
     born_at INTEGER NOT NULL
   );
+  CREATE TABLE IF NOT EXISTS personality (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    json TEXT NOT NULL,
+    born_at INTEGER NOT NULL
+  );
 `;
 
 let dbPromise: Promise<SQLite.SQLiteDatabase> | null = null;

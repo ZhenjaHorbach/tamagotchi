@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.ui,
     fontSize: FONT_SIZE.caption,
     lineHeight: 16,
-    marginTop: 4,
+    marginTop: SPACING.xs,
   },
   group: {
     overflow: 'hidden',
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   foot: {
     textAlign: 'center',
-    paddingTop: 2,
+    paddingTop: SPACING.xxs,
     marginTop: 'auto',
   },
 });

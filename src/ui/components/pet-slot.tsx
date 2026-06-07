@@ -13,7 +13,7 @@ import type { Mood } from '@/core';
 import { PixelIcon } from '@/render/pixel-icon';
 import { SpritePlayer } from '@/render/sprite-player';
 import { RadialBg } from '@/ui/components/gradient-bg';
-import { fadeOut, ICON_SIZE, RADIUS, useTheme } from '@/ui/theme';
+import { fadeOut, ICON_SIZE, RADIUS, SPACING, useTheme } from '@/ui/theme';
 
 const SIZE = 98;
 
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     height: 13,
     borderRadius: RADIUS.pill,
     backgroundColor: 'rgba(0,0,0,0.22)',
-    marginTop: 2,
+    marginTop: SPACING.xxs,
   },
   zzz: {
     position: 'absolute',

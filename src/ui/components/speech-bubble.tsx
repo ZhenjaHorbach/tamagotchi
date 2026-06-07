@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     paddingTop: SPACING.sm,
     paddingHorizontal: SPACING.md,
     paddingBottom: SPACING.md,
-    marginHorizontal: 2,
+    marginHorizontal: SPACING.xxs,
   },
   tail: {
     position: 'absolute',
@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   caret: {
     width: 8,
     height: 15,
-    marginLeft: 2,
+    marginLeft: SPACING.xxs,
     marginBottom: -2,
   },
 });

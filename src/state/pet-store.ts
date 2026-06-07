@@ -1,7 +1,9 @@
 import { create } from 'zustand';
 
 import { applyElapsed, createPet, feed, play, sleep, type PetState } from '@/core';
-import { getPet, savePet } from '@/db/pet-repo';
+import { currentModifiers, usePersonalityStore } from '@/ai/personality-store';
+import { clearPet, getPet, savePet } from '@/db/pet-repo';
+import { clearPersonality } from '@/db/personality-repo';
 
 type PetStore = {
   pet: PetState | null;
@@ -11,16 +13,23 @@ type PetStore = {
   feed: () => Promise<void>;
   play: () => Promise<void>;
   sleep: () => Promise<void>;
-  /** Say goodbye: replace the pet with a freshly born one. */
+  /** Give birth to a new pet (the hatch ceremony's payoff). */
+  hatch: () => Promise<void>;
+  /** Say goodbye: forget the pet and its personality. Leaves no pet. */
   reset: () => Promise<void>;
 };
 
 export const usePetStore = create<PetStore>((set, get) => {
-  const commit = async (action?: (s: PetState) => PetState) => {
+  /** Catch up on elapsed time (with personality modifiers), apply an optional
+   *  action, persist, publish. */
+  const commit = async (
+    action?: (s: PetState, mods: ReturnType<typeof currentModifiers>) => PetState,
+  ) => {
     const current = get().pet;
     if (!current) return;
-    let next = applyElapsed(current, Date.now());
-    if (action) next = action(next);
+    const mods = currentModifiers();
+    let next = applyElapsed(current, Date.now(), mods);
+    if (action) next = action(next, mods);
     set({ pet: next });
     await savePet(next);
   };
@@ -29,23 +38,33 @@ export const usePetStore = create<PetStore>((set, get) => {
     pet: null,
     hydrated: false,
 
+    // Read the stored pet (catching up on elapsed time). No auto-create: a
+    // missing pet means the player hasn't hatched one yet → hatch flow.
     bootstrap: async () => {
-      const now = Date.now();
       const stored = await getPet();
-      const pet = applyElapsed(stored ?? createPet(now), now);
-      await savePet(pet);
+      const pet = stored ? applyElapsed(stored, Date.now(), currentModifiers()) : null;
+      if (pet) await savePet(pet);
       set({ pet, hydrated: true });
     },
 
     refresh: () => commit(),
-    feed: () => commit(feed),
-    play: () => commit(play),
-    sleep: () => commit(sleep),
+    feed: () => commit((s, mods) => feed(s, mods)),
+    play: () => commit((s, mods) => play(s, mods)),
+    sleep: () => commit((s) => sleep(s)),
 
-    reset: async () => {
+    hatch: async () => {
       const pet = createPet(Date.now());
+      // persist the personality previewed during the ceremony for this bornAt
+      await usePersonalityStore.getState().commit(pet.bornAt);
       set({ pet });
       await savePet(pet);
+    },
+
+    reset: async () => {
+      await clearPet();
+      await clearPersonality();
+      usePersonalityStore.getState().clear();
+      set({ pet: null });
     },
   };
 });

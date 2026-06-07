@@ -13,13 +13,14 @@ import { Nameplate } from '@/ui/components/nameplate';
 import { PetSlot } from '@/ui/components/pet-slot';
 import { SpeechBubble } from '@/ui/components/speech-bubble';
 import { StatGauge } from '@/ui/components/stat-gauge';
-import { PET_NAME } from '@/ui/pet-identity';
+import { usePetName } from '@/ai/personality-store';
 import { useSpeech } from '@/ui/use-speech';
 import { buttonTones, gaugeTones, SPACING, useSurfaces } from '@/ui/theme';
 
 export default function HabitatScreen() {
   const { t } = useTranslation();
   const surfaces = useSurfaces();
+  const name = usePetName();
   const pet = usePetStore((s) => s.pet);
   const feed = usePetStore((s) => s.feed);
   const play = usePetStore((s) => s.play);
@@ -55,11 +56,11 @@ export default function HabitatScreen() {
   return (
     <View style={styles.home}>
       <View style={styles.topbar}>
-        <Nameplate name={PET_NAME} mood={mood} />
+        <Nameplate name={name} mood={mood} />
       </View>
 
       <SpeechBubble
-        name={PET_NAME}
+        name={name}
         shown={speech.shown}
         done={speech.done}
         thinking={speech.thinking}
@@ -92,8 +93,8 @@ export default function HabitatScreen() {
           icon="bowl"
           label={t('habitat.feed')}
           tone={buttons.feed}
-          onPress={() => {
-            feed();
+          onPress={async () => {
+            await feed();
             speak('feed');
           }}
         />
@@ -102,8 +103,8 @@ export default function HabitatScreen() {
           label={t('habitat.play')}
           tone={buttons.play}
           disabled={tooTired}
-          onPress={() => {
-            play();
+          onPress={async () => {
+            await play();
             speak('play');
           }}
         />
@@ -111,8 +112,8 @@ export default function HabitatScreen() {
           icon="moon"
           label={t('habitat.sleep')}
           tone={buttons.sleep}
-          onPress={() => {
-            sleep();
+          onPress={async () => {
+            await sleep();
             speak('sleep');
           }}
         />

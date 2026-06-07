@@ -46,3 +46,8 @@ export async function savePet(pet: PetState): Promise<void> {
     },
   );
 }
+
+export async function clearPet(): Promise<void> {
+  const db = await getDatabase();
+  await db.runAsync('DELETE FROM pet WHERE id = 1');
+}

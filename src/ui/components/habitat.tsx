@@ -12,7 +12,7 @@ import Animated, {
 
 import { PixelIcon } from '@/render/pixel-icon';
 import { LinearBg, RadialBg } from '@/ui/components/gradient-bg';
-import { BORDER_WIDTH, fadeOut, ICON_SIZE, RADIUS, useTheme } from '@/ui/theme';
+import { BORDER_WIDTH, fadeOut, ICON_SIZE, RADIUS, SPACING, useTheme } from '@/ui/theme';
 
 const WINDOW_W = 150;
 const WINDOW_RIM = 3;
@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
     minHeight: 0,
     borderRadius: RADIUS.md,
     overflow: 'hidden',
-    marginHorizontal: 2,
+    marginHorizontal: SPACING.xxs,
   },
   window: {
     position: 'absolute',

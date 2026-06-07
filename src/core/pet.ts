@@ -5,6 +5,7 @@ import {
   MOOD_THRESHOLDS,
   NEWBORN_STATS,
 } from './constants';
+import { NEUTRAL_MODIFIERS, type Modifiers } from './traits';
 import type { Mood, PetState } from './types';
 
 /** Clamp a stat into the 0..100 range. */
@@ -24,16 +25,16 @@ export function createPet(now: number): PetState {
 /**
  * Apply time-based decay for the period since `lastSeenAt`.
  * Clock-tamper safe: a clock rolled backwards yields zero elapsed time,
- * never negative decay.
+ * never negative decay. Personality modifiers scale the per-hour rates.
  */
-export function applyElapsed(s: PetState, now: number): PetState {
+export function applyElapsed(s: PetState, now: number, mods: Modifiers = NEUTRAL_MODIFIERS): PetState {
   const elapsedMs = Math.max(0, now - s.lastSeenAt);
   const hours = elapsedMs / HOUR_MS;
   return {
     ...s,
-    hunger: clamp(s.hunger + DECAY_PER_HOUR.hunger * hours),
-    energy: clamp(s.energy + DECAY_PER_HOUR.energy * hours),
-    joy: clamp(s.joy + DECAY_PER_HOUR.joy * hours),
+    hunger: clamp(s.hunger + DECAY_PER_HOUR.hunger * mods.hungerDecay * hours),
+    energy: clamp(s.energy + DECAY_PER_HOUR.energy * mods.energyDecay * hours),
+    joy: clamp(s.joy + DECAY_PER_HOUR.joy * mods.joyDecay * hours),
     lastSeenAt: now,
   };
 }
@@ -47,19 +48,21 @@ export function deriveMood(s: PetState): Mood {
   return 'neutral';
 }
 
-export function feed(s: PetState): PetState {
+export function feed(s: PetState, mods: Modifiers = NEUTRAL_MODIFIERS): PetState {
   return {
     ...s,
-    hunger: clamp(s.hunger + ACTION_EFFECTS.feed.hunger),
+    // ACTION_EFFECTS.feed.hunger is negative (fills the belly) — feedGain scales it
+    hunger: clamp(s.hunger + ACTION_EFFECTS.feed.hunger * mods.feedGain),
     joy: clamp(s.joy + ACTION_EFFECTS.feed.joy),
   };
 }
 
-export function play(s: PetState): PetState {
+export function play(s: PetState, mods: Modifiers = NEUTRAL_MODIFIERS): PetState {
   return {
     ...s,
-    joy: clamp(s.joy + ACTION_EFFECTS.play.joy),
-    energy: clamp(s.energy + ACTION_EFFECTS.play.energy),
+    joy: clamp(s.joy + ACTION_EFFECTS.play.joy * mods.playJoyGain),
+    // ACTION_EFFECTS.play.energy is negative — playEnergyCost scales the drain
+    energy: clamp(s.energy + ACTION_EFFECTS.play.energy * mods.playEnergyCost),
     hunger: clamp(s.hunger + ACTION_EFFECTS.play.hunger),
   };
 }

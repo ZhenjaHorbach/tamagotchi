@@ -2,7 +2,7 @@
 // three chin-button tabs persist while routes swap inside the inset screen.
 
 import { Stack, usePathname, useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -42,9 +42,18 @@ export default function ToyLayout() {
   const router = useRouter();
   const pathname = usePathname();
   const pet = usePetStore((s) => s.pet);
+  const hydrated = usePetStore((s) => s.hydrated);
 
   const mood = pet ? deriveMood(pet) : 'neutral';
   const theme = useMemo(() => moodTheme(mood), [mood]);
+
+  // no pet (first launch or after a reset) → home shelf, where you hatch one.
+  // The hatch ceremony itself is allowed to render without a pet.
+  useEffect(() => {
+    if (hydrated && !pet && pathname !== '/shelf' && pathname !== '/hatch') {
+      router.replace('/shelf');
+    }
+  }, [hydrated, pet, pathname, router]);
 
   // fit the fixed-size toy into the phone
   const { width, height } = useWindowDimensions();
@@ -56,6 +65,7 @@ export default function ToyLayout() {
   );
 
   const activeTab = TAB_FOR_PATH[pathname] ?? '/';
+  const tabsLocked = hydrated && !pet;
 
   return (
     <ThemeProvider value={theme}>
@@ -69,7 +79,8 @@ export default function ToyLayout() {
               id: tab.id,
               label: t(`nav.${tab.id}`),
               onPress: () => router.navigate(tab.path),
-              active: activeTab === tab.path,
+              active: !tabsLocked && activeTab === tab.path,
+              disabled: tabsLocked,
             }))}
           >
             <Stack
