@@ -1,5 +1,5 @@
-// Canned speech lines from the design prototype. On day 4 these get replaced
-// by the on-device SLM; the streaming pipeline stays the same.
+// Canned speech lines from the design prototype. Eventually the on-device SLM
+// replaces these; the streaming pipeline stays the same.
 
 export const LINES = {
   greet: [

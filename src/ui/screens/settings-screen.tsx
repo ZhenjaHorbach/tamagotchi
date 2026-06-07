@@ -1,10 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
-import { FONTS, PLASTIC, SURF_RADIUS, useTheme } from '@/ui/theme';
+import { BORDER_WIDTH, FONT_SIZE, FONTS, ICON_SIZE, PLASTIC, RADIUS, shared, SPACING, SURF_RADIUS, useSurfaces, useTheme } from '@/ui/theme';
 
 function PixToggle({ value, onChange }: { value: boolean; onChange: (v: boolean) => void }) {
   const theme = useTheme();
@@ -24,9 +24,10 @@ function PixToggle({ value, onChange }: { value: boolean; onChange: (v: boolean)
 
 function RowIcon({ name }: { name: IconName }) {
   const theme = useTheme();
+  const surfaces = useSurfaces();
   return (
-    <View style={[styles.rowIco, { backgroundColor: theme.bubbleBg, borderColor: theme.panelLine }]}>
-      <PixelIcon name={name} size={15} color={theme.accent} />
+    <View style={[surfaces.iconBox, styles.rowIco]}>
+      <PixelIcon name={name} size={ICON_SIZE.md} color={theme.accent} />
     </View>
   );
 }
@@ -60,10 +61,13 @@ function SetToggleRow({
 type Props = {
   name: string;
   onReset: () => void;
+  /** opens the AI Lab — talk to the on-device model directly */
+  onOpenAiLab?: () => void;
 };
 
-export function SettingsScreen({ name, onReset }: Props) {
+export function SettingsScreen({ name, onReset, onOpenAiLab }: Props) {
   const theme = useTheme();
+  const surfaces = useSurfaces();
   const [notif, setNotif] = useState(true);
   const [sound, setSound] = useState(true);
   const [about, setAbout] = useState(false);
@@ -89,12 +93,15 @@ export function SettingsScreen({ name, onReset }: Props) {
   };
 
   return (
-    <View style={styles.root}>
+    <ScrollView
+      style={styles.root}
+      contentContainerStyle={styles.content}
+      showsVerticalScrollIndicator={false}>
       <Text style={[styles.head, { color: theme.ink }]}>Settings</Text>
 
-      <View style={[styles.privacy, { backgroundColor: theme.accentSoft, borderColor: theme.panelLine }]}>
-        <View style={[styles.privacyIco, { backgroundColor: theme.bubbleBg, borderColor: theme.panelLine }]}>
-          <PixelIcon name="shield" size={24} color={theme.accent} />
+      <View style={[surfaces.panel, styles.privacy, { backgroundColor: theme.accentSoft }]}>
+        <View style={[surfaces.iconBox, styles.privacyIco]}>
+          <PixelIcon name="shield" size={ICON_SIZE.lg} color={theme.accent} />
         </View>
         <View style={styles.privacyBody}>
           <Text style={[styles.privacyTitle, { color: theme.ink }]}>Everything runs on your device</Text>
@@ -105,7 +112,7 @@ export function SettingsScreen({ name, onReset }: Props) {
         </View>
       </View>
 
-      <View style={[styles.group, { backgroundColor: theme.panel, borderColor: theme.panelLine }]}>
+      <View style={[surfaces.panel, styles.group]}>
         <SetToggleRow
           icon="bell"
           title="Reminders"
@@ -123,7 +130,7 @@ export function SettingsScreen({ name, onReset }: Props) {
         />
       </View>
 
-      <View style={[styles.group, { backgroundColor: theme.panel, borderColor: theme.panelLine }]}>
+      <View style={[surfaces.panel, styles.group]}>
         <Pressable
           style={({ pressed }) => [styles.row, pressed && { backgroundColor: theme.accentSoft }]}
           onPress={() => setAbout((a) => !a)}>
@@ -133,7 +140,7 @@ export function SettingsScreen({ name, onReset }: Props) {
             <Text style={[styles.rowSub, { color: theme.inkSoft }]}>about the little on-device mind</Text>
           </View>
           <View style={{ transform: [{ rotate: about ? '90deg' : '0deg' }] }}>
-            <PixelIcon name="chevR" size={10} color={theme.inkFaint} />
+            <PixelIcon name="chevR" size={ICON_SIZE.sm} color={theme.inkFaint} />
           </View>
         </Pressable>
         {about && (
@@ -145,6 +152,23 @@ export function SettingsScreen({ name, onReset }: Props) {
             </Text>
           </View>
         )}
+        {onOpenAiLab && (
+          <>
+            <View style={[styles.divider, { backgroundColor: theme.panelLine }]} />
+            <Pressable
+              style={({ pressed }) => [styles.row, pressed && { backgroundColor: theme.accentSoft }]}
+              onPress={onOpenAiLab}>
+              <RowIcon name="scan" />
+              <View style={styles.rowMain}>
+                <Text style={[styles.rowTitle, { color: theme.ink }]}>AI Lab</Text>
+                <Text style={[styles.rowSub, { color: theme.inkSoft }]}>
+                  talk to the little mind directly
+                </Text>
+              </View>
+              <PixelIcon name="chevR" size={ICON_SIZE.sm} color={theme.inkFaint} />
+            </Pressable>
+          </>
+        )}
       </View>
 
       <Pressable
@@ -155,71 +179,65 @@ export function SettingsScreen({ name, onReset }: Props) {
             ? { backgroundColor: theme.accent, borderColor: 'transparent' }
             : { backgroundColor: theme.panel, borderColor: theme.panelLine },
         ]}>
-        <PixelIcon name="egg" size={15} color={armed ? PLASTIC.cream : theme.inkSoft} />
+        <PixelIcon name="egg" size={ICON_SIZE.md} color={armed ? PLASTIC.cream : theme.inkSoft} />
         <Text style={[styles.resetText, { color: armed ? PLASTIC.cream : theme.inkSoft }]}>
           {armed ? `tap again — this says goodbye to ${name}` : 'Reset & hatch a new pet'}
         </Text>
       </Pressable>
 
-      <Text style={[styles.foot, { color: theme.inkFaint }]}>
-        POCKET TERRARIUM · V0.1 · MADE FOR {name.toUpperCase()}
+      <Text style={[shared.pixelLabel, styles.foot, { color: theme.inkFaint }]}>
+        Pocket Terrarium · v0.1 · made for {name}
       </Text>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    paddingTop: 16,
-    paddingHorizontal: 15,
-    paddingBottom: 14,
-    gap: 11,
+  },
+  content: {
+    flexGrow: 1, // keeps the footer pinned down when content is short
+    padding: SPACING.lg,
+    gap: SPACING.md,
   },
   head: {
     fontFamily: FONTS.display,
-    fontSize: 25,
+    fontSize: FONT_SIZE.display,
   },
   privacy: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    gap: 11,
-    padding: 13,
-    borderRadius: SURF_RADIUS,
-    borderWidth: 1,
+    gap: SPACING.md,
+    padding: SPACING.md,
   },
   privacyIco: {
     width: 40,
     height: 40,
-    borderRadius: 11,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: RADIUS.md,
   },
   privacyBody: {
     flex: 1,
   },
   privacyTitle: {
     fontFamily: FONTS.display,
-    fontSize: 16,
+    fontSize: FONT_SIZE.subtitle,
   },
   privacySub: {
     fontFamily: FONTS.ui,
-    fontSize: 11.5,
+    fontSize: FONT_SIZE.caption,
     lineHeight: 16,
     marginTop: 4,
   },
   group: {
-    borderRadius: SURF_RADIUS,
-    borderWidth: 1,
     overflow: 'hidden',
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 11,
-    paddingVertical: 12,
-    paddingHorizontal: 13,
+    gap: SPACING.md,
+    paddingVertical: SPACING.md,
+    paddingHorizontal: SPACING.md,
   },
   divider: {
     height: 1,
@@ -227,63 +245,57 @@ const styles = StyleSheet.create({
   rowIco: {
     width: 30,
     height: 30,
-    borderRadius: 9,
-    borderWidth: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderRadius: RADIUS.sm,
   },
   rowMain: {
     flex: 1,
-    gap: 2,
+    gap: SPACING.xxs,
   },
   rowTitle: {
     fontFamily: FONTS.uiHeavy,
-    fontSize: 13.5,
+    fontSize: FONT_SIZE.button,
   },
   rowSub: {
     fontFamily: FONTS.ui,
-    fontSize: 11,
+    fontSize: FONT_SIZE.caption,
   },
   toggle: {
     width: 46,
     height: 26,
-    borderRadius: 7,
+    borderRadius: RADIUS.sm,
     padding: 3,
   },
   toggleKnob: {
     width: 20,
     height: 20,
-    borderRadius: 5,
+    borderRadius: RADIUS.xs,
   },
   about: {
-    paddingHorizontal: 14,
-    paddingBottom: 13,
-    paddingTop: 11,
-    borderTopWidth: 1,
+    paddingHorizontal: SPACING.lg,
+    paddingBottom: SPACING.md,
+    paddingTop: SPACING.md,
+    borderTopWidth: BORDER_WIDTH.hairline,
   },
   aboutText: {
     fontFamily: FONTS.ui,
-    fontSize: 12,
+    fontSize: FONT_SIZE.body,
     lineHeight: 18,
   },
   reset: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-    paddingVertical: 13,
+    gap: SPACING.sm,
+    paddingVertical: SPACING.md,
     borderRadius: SURF_RADIUS,
-    borderWidth: 1.5,
+    borderWidth: BORDER_WIDTH.regular,
   },
   resetText: {
     fontFamily: FONTS.uiHeavy,
-    fontSize: 13,
+    fontSize: FONT_SIZE.button,
   },
   foot: {
     textAlign: 'center',
-    fontFamily: FONTS.pixel,
-    fontSize: 8,
-    letterSpacing: 0.5,
     paddingTop: 2,
     marginTop: 'auto',
   },

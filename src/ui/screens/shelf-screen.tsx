@@ -5,7 +5,7 @@ import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
 import { SpritePlayer } from '@/render/sprite-player';
 import { LinearBg, RadialBg } from '@/ui/components/gradient-bg';
-import { fadeOut, FONTS, MOOD_META, useTheme } from '@/ui/theme';
+import { BORDER_WIDTH, fadeOut, FONT_SIZE, FONTS, ICON_SIZE, RADIUS, MOOD_META, shared, SPACING, useSurfaces, useTheme } from '@/ui/theme';
 
 const DOME_W = 128;
 const DOME_H = 126;
@@ -36,7 +36,7 @@ function PetDome({ name, mood, onPress }: { name: string; mood: Mood; onPress: (
       <View style={styles.plate}>
         <Text style={[styles.name, { color: theme.ink }]}>{name}</Text>
         <Text style={[styles.moodText, { color: theme.inkSoft }]}>
-          <PixelIcon name={meta.glyph as IconName} size={9} color={theme.accent} /> {meta.label.toLowerCase()}
+          <PixelIcon name={meta.glyph as IconName} size={ICON_SIZE.sm} color={theme.accent} /> {meta.label.toLowerCase()}
         </Text>
       </View>
     </Pressable>
@@ -49,14 +49,14 @@ function EmptyDome() {
     <View style={styles.dome}>
       <View style={[styles.glass, { backgroundColor: theme.panelLine }]}>
         <View style={[styles.glassInner, styles.glassEmpty, { backgroundColor: theme.panel }]}>
-          <PixelIcon name="egg" size={30} color={theme.inkFaint} />
+          <PixelIcon name="egg" size={ICON_SIZE.xl} color={theme.inkFaint} />
         </View>
       </View>
       <View style={[styles.cork, { backgroundColor: theme.panelLine, opacity: 0.7 }]} />
       <View style={styles.plate}>
         <Text style={[styles.name, { color: theme.inkFaint }]}>empty</Text>
         <Text style={[styles.moodText, { color: theme.inkFaint }]}>
-          <PixelIcon name="plus" size={8} color={theme.inkFaint} /> hatch one
+          <PixelIcon name="plus" size={ICON_SIZE.xs} color={theme.inkFaint} /> hatch one
         </Text>
       </View>
     </View>
@@ -71,6 +71,7 @@ type Props = {
 
 export function ShelfScreen({ name, mood, onEnterPet }: Props) {
   const theme = useTheme();
+  const surfaces = useSurfaces();
   return (
     <View style={styles.root}>
       <View style={styles.head}>
@@ -78,8 +79,8 @@ export function ShelfScreen({ name, mood, onEnterPet }: Props) {
           <Text style={[styles.title, { color: theme.ink }]}>Your pocket</Text>
           <Text style={[styles.sub, { color: theme.inkSoft }]}>one little creature, and room for more</Text>
         </View>
-        <View style={[styles.count, { backgroundColor: theme.panel, borderColor: theme.panelLine }]}>
-          <PixelIcon name="dome" size={12} color={theme.accent} />
+        <View style={[shared.row, surfaces.panel, styles.count]}>
+          <PixelIcon name="dome" size={ICON_SIZE.sm} color={theme.accent} />
           <Text style={[styles.countText, { color: theme.inkSoft }]}> 1</Text>
         </View>
       </View>
@@ -98,7 +99,7 @@ export function ShelfScreen({ name, mood, onEnterPet }: Props) {
       </View>
 
       <View style={styles.foot}>
-        <PixelIcon name="moon" size={10} color={theme.inkFaint} />
+        <PixelIcon name="moon" size={ICON_SIZE.sm} color={theme.inkFaint} />
         <Text style={[styles.footText, { color: theme.inkFaint }]}> every creature lives on this device</Text>
       </View>
     </View>
@@ -108,10 +109,8 @@ export function ShelfScreen({ name, mood, onEnterPet }: Props) {
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    paddingTop: 16,
-    paddingHorizontal: 16,
-    paddingBottom: 14,
-    gap: 12,
+    padding: SPACING.lg,
+    gap: SPACING.md,
   },
   head: {
     flexDirection: 'row',
@@ -120,24 +119,21 @@ const styles = StyleSheet.create({
   },
   title: {
     fontFamily: FONTS.display,
-    fontSize: 25,
+    fontSize: FONT_SIZE.display,
   },
   sub: {
     fontFamily: FONTS.ui,
-    fontSize: 11,
-    marginTop: 5,
+    fontSize: FONT_SIZE.caption,
+    marginTop: SPACING.xs,
   },
   count: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 999,
-    borderWidth: 1,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.pill,
   },
   countText: {
     fontFamily: FONTS.pixel,
-    fontSize: 10,
+    fontSize: FONT_SIZE.pixelLg,
   },
   stage: {
     flex: 1,
@@ -148,9 +144,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'flex-start',
-    gap: 16,
-    paddingHorizontal: 4,
-    paddingBottom: 26,
+    gap: SPACING.lg,
+    paddingHorizontal: SPACING.xs,
+    paddingBottom: SPACING.xxl,
   },
   plank: {
     position: 'absolute',
@@ -158,14 +154,14 @@ const styles = StyleSheet.create({
     right: -4,
     top: DOME_H + 1,
     height: 17,
-    borderRadius: 4,
+    borderRadius: RADIUS.xs,
     shadowColor: '#000',
     shadowOpacity: 0.22,
     shadowRadius: 14,
     shadowOffset: { width: 0, height: 9 },
   },
   plankBg: {
-    borderRadius: 4,
+    borderRadius: RADIUS.xs,
     overflow: 'hidden',
   },
   plankShadow: {
@@ -174,7 +170,7 @@ const styles = StyleSheet.create({
     right: 20,
     top: DOME_H + 100,
     height: 12,
-    borderRadius: 3,
+    borderRadius: RADIUS.xs,
     opacity: 0.34,
   },
   dome: {
@@ -189,8 +185,8 @@ const styles = StyleSheet.create({
     height: DOME_H,
     borderTopLeftRadius: DOME_W / 2,
     borderTopRightRadius: DOME_W / 2,
-    borderBottomLeftRadius: 16,
-    borderBottomRightRadius: 16,
+    borderBottomLeftRadius: RADIUS.lg,
+    borderBottomRightRadius: RADIUS.lg,
     // rim via nested view, not a border: RN borders glitch into a thick cap
     // at the dome apex when the two top radii meet (radius == width/2)
     backgroundColor: 'rgba(255,255,255,0.26)',
@@ -201,8 +197,8 @@ const styles = StyleSheet.create({
     margin: 2,
     borderTopLeftRadius: DOME_W / 2 - 2,
     borderTopRightRadius: DOME_W / 2 - 2,
-    borderBottomLeftRadius: 14,
-    borderBottomRightRadius: 14,
+    borderBottomLeftRadius: RADIUS.lg,
+    borderBottomRightRadius: RADIUS.lg,
     overflow: 'hidden',
   },
   glassEmpty: {
@@ -223,7 +219,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     height: '28%',
-    borderTopWidth: 2,
+    borderTopWidth: BORDER_WIDTH.bold,
     borderTopColor: 'rgba(0,0,0,0.1)',
     overflow: 'hidden',
   },
@@ -240,44 +236,44 @@ const styles = StyleSheet.create({
     left: 15,
     width: 32,
     height: 48,
-    borderRadius: 20,
+    borderRadius: RADIUS.xl,
     backgroundColor: 'rgba(255,255,255,0.28)',
     transform: [{ rotate: '-12deg' }],
   },
   cork: {
     width: 114,
     height: 13,
-    borderBottomLeftRadius: 9,
-    borderBottomRightRadius: 9,
+    borderBottomLeftRadius: RADIUS.sm,
+    borderBottomRightRadius: RADIUS.sm,
     marginTop: -1,
     overflow: 'hidden',
   },
   corkBg: {
-    borderBottomLeftRadius: 9,
-    borderBottomRightRadius: 9,
+    borderBottomLeftRadius: RADIUS.sm,
+    borderBottomRightRadius: RADIUS.sm,
   },
   plate: {
     alignItems: 'center',
-    gap: 2,
-    marginTop: 9,
+    gap: SPACING.xxs,
+    marginTop: SPACING.sm,
   },
   name: {
     fontFamily: FONTS.display,
-    fontSize: 17,
+    fontSize: FONT_SIZE.speech,
   },
   moodText: {
     fontFamily: FONTS.uiBold,
-    fontSize: 9.5,
+    fontSize: FONT_SIZE.pixelLg,
     textTransform: 'lowercase',
   },
   foot: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 5,
+    gap: SPACING.xs,
   },
   footText: {
     fontFamily: FONTS.uiBold,
-    fontSize: 9.5,
+    fontSize: FONT_SIZE.pixelLg,
   },
 });

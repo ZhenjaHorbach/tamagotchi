@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import type { Mood } from '@/core';
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
-import { FONTS, MOOD_META, SURF_RADIUS, useTheme } from '@/ui/theme';
+import { FONT_SIZE, FONTS, ICON_SIZE, LETTER_SPACING, MOOD_META, SPACING, useSurfaces, useTheme } from '@/ui/theme';
 
 type Props = {
   name: string;
@@ -13,26 +13,25 @@ type Props = {
 
 export function Nameplate({ name, mood, onPress }: Props) {
   const theme = useTheme();
+  const surfaces = useSurfaces();
   const meta = MOOD_META[mood];
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [
+        surfaces.panel,
         styles.row,
-        {
-          backgroundColor: pressed ? theme.accentSoft : theme.panel,
-          borderColor: theme.panelLine,
-        },
+        pressed && { backgroundColor: theme.accentSoft },
       ]}>
       <Text style={[styles.name, { color: theme.ink }]} numberOfLines={1}>
         {name}
         {'  '}
         <Text style={[styles.mood, { color: theme.inkSoft }]}>
-          <PixelIcon name={meta.glyph as IconName} size={11} color={theme.accent} /> {meta.label}
+          <PixelIcon name={meta.glyph as IconName} size={ICON_SIZE.sm} color={theme.accent} /> {meta.label}
         </Text>
       </Text>
       <Text style={[styles.id, { color: theme.inkFaint }]}>
-        CARD <PixelIcon name="chevR" size={9} color={theme.inkFaint} />
+        CARD <PixelIcon name="chevR" size={ICON_SIZE.sm} color={theme.inkFaint} />
       </Text>
     </Pressable>
   );
@@ -44,23 +43,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    borderRadius: SURF_RADIUS,
-    borderWidth: 1,
+    paddingVertical: SPACING.sm,
+    paddingHorizontal: SPACING.md,
   },
   name: {
     fontFamily: FONTS.display,
-    fontSize: 21,
+    fontSize: FONT_SIZE.title,
   },
   mood: {
     fontFamily: FONTS.uiBold,
-    fontSize: 11,
+    fontSize: FONT_SIZE.caption,
     textTransform: 'lowercase',
   },
   id: {
     fontFamily: FONTS.pixel,
-    fontSize: 8,
-    letterSpacing: 0.8,
+    fontSize: FONT_SIZE.pixel,
+    letterSpacing: LETTER_SPACING.base,
   },
 });

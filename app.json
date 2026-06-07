@@ -37,7 +37,16 @@
           }
         }
       ],
-      "expo-sqlite"
+      "expo-sqlite",
+      "expo-asset",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "deploymentTarget": "17.0"
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

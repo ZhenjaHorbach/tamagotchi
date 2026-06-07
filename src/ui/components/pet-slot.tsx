@@ -13,7 +13,7 @@ import type { Mood } from '@/core';
 import { PixelIcon } from '@/render/pixel-icon';
 import { SpritePlayer } from '@/render/sprite-player';
 import { RadialBg } from '@/ui/components/gradient-bg';
-import { fadeOut, useTheme } from '@/ui/theme';
+import { fadeOut, ICON_SIZE, RADIUS, useTheme } from '@/ui/theme';
 
 const SIZE = 98;
 
@@ -30,7 +30,7 @@ function Zzz() {
   return (
     <Animated.View style={styles.zzz}>
       <Animated.View style={style}>
-        <PixelIcon name="zzz" size={26} color={theme.inkSoft} />
+        <PixelIcon name="zzz" size={ICON_SIZE.lg} color={theme.inkSoft} />
       </Animated.View>
     </Animated.View>
   );
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
   shadow: {
     width: 74,
     height: 13,
-    borderRadius: 999,
+    borderRadius: RADIUS.pill,
     backgroundColor: 'rgba(0,0,0,0.22)',
     marginTop: 2,
   },

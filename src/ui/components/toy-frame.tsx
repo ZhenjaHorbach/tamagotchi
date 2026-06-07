@@ -11,7 +11,7 @@ import Animated, {
 
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
-import { BEZEL_RADIUS, FONTS, PLASTIC, TOY_RADIUS, useTheme } from '@/ui/theme';
+import { BEZEL_RADIUS, BORDER_WIDTH, FONT_SIZE, FONTS, ICON_SIZE, LETTER_SPACING, PLASTIC, RADIUS, SPACING, TOY_RADIUS, useTheme } from '@/ui/theme';
 import { LinearBg } from '@/ui/components/gradient-bg';
 
 export const TOY_WIDTH = 412;
@@ -83,7 +83,7 @@ function HardwareButton({ icon, label, onPress, active }: HardwareAction) {
           ]}>
           {/* active ring drawn outside the knob, never affects layout */}
           {active && <View style={[styles.knobRing, { borderColor: theme.accent }]} />}
-          <PixelIcon name={icon} size={16} color={active ? theme.accent : PLASTIC.knobInk} />
+          <PixelIcon name={icon} size={ICON_SIZE.md} color={active ? theme.accent : PLASTIC.knobInk} />
         </View>
       </View>
       <Text style={[styles.hwLabel, { color: PLASTIC.brand }]}>{label.toUpperCase()}</Text>
@@ -149,11 +149,11 @@ export function ToyFrame({ children, hw, badge }: Props) {
 const styles = StyleSheet.create({
   toy: {
     width: TOY_WIDTH,
-    paddingTop: 16,
-    paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingTop: SPACING.lg,
+    paddingHorizontal: SPACING.xl,
+    paddingBottom: SPACING.md,
     borderRadius: TOY_RADIUS,
-    borderWidth: 1,
+    borderWidth: BORDER_WIDTH.hairline,
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 24,
@@ -168,33 +168,34 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 4,
     height: 4,
-    borderRadius: 2,
+    borderRadius: RADIUS.xxs,
   },
   top: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 10,
+    paddingHorizontal: SPACING.sm,
     paddingTop: 2,
-    paddingBottom: 8,
+    paddingBottom: SPACING.sm,
   },
   brand: {
     fontFamily: FONTS.pixel,
-    fontSize: 10,
-    letterSpacing: 1.2,
+    fontSize: FONT_SIZE.pixelLg,
+    letterSpacing: LETTER_SPACING.wide,
   },
   led: {
     width: 9,
     height: 9,
-    borderRadius: 5,
-    borderWidth: 2,
+    borderRadius: RADIUS.pill,
+
+    borderWidth: BORDER_WIDTH.bold,
     borderColor: 'rgba(255,255,255,0.25)',
     shadowOpacity: 1,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 0 },
   },
   bezel: {
-    padding: 12,
+    padding: SPACING.md,
     borderRadius: BEZEL_RADIUS,
     overflow: 'hidden',
   },
@@ -203,48 +204,48 @@ const styles = StyleSheet.create({
   },
   screen: {
     height: SCREEN_HEIGHT,
-    borderRadius: 14,
+    borderRadius: RADIUS.lg,
     overflow: 'hidden',
-    borderWidth: 1.5,
+    borderWidth: BORDER_WIDTH.regular,
     borderColor: 'rgba(0,0,0,0.35)',
   },
   badge: {
     position: 'absolute',
-    top: 9,
+    top: SPACING.sm,
     alignSelf: 'center',
-    paddingVertical: 4,
-    paddingHorizontal: 9,
-    borderRadius: 6,
+    paddingVertical: SPACING.xs,
+    paddingHorizontal: SPACING.sm,
+    borderRadius: RADIUS.sm,
   },
   badgeText: {
     fontFamily: FONTS.pixel,
-    fontSize: 8,
-    letterSpacing: 0.8,
+    fontSize: FONT_SIZE.pixel,
+    letterSpacing: LETTER_SPACING.base,
   },
   chin: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 14,
-    paddingTop: 14,
-    paddingBottom: 6,
-    paddingHorizontal: 6,
+    gap: SPACING.lg,
+    paddingTop: SPACING.lg,
+    paddingBottom: SPACING.sm,
+    paddingHorizontal: SPACING.sm,
   },
   grille: {
-    gap: 3,
+    gap: SPACING.xxs,
   },
   grilleBar: {
     width: 18,
     height: 3,
-    borderRadius: 2,
+    borderRadius: RADIUS.xxs,
   },
   hwRow: {
     flexDirection: 'row',
-    gap: 18,
+    gap: SPACING.xl,
   },
   hw: {
     alignItems: 'center',
-    gap: 5,
+    gap: SPACING.xs,
     padding: 2,
   },
   knobBox: {
@@ -266,7 +267,7 @@ const styles = StyleSheet.create({
     borderRadius: KNOB_SIZE / 2,
     alignItems: 'center',
     justifyContent: 'center',
-    borderTopWidth: 1,
+    borderTopWidth: BORDER_WIDTH.hairline,
     borderTopColor: 'rgba(255,255,255,0.5)',
   },
   knobRing: {
@@ -276,11 +277,11 @@ const styles = StyleSheet.create({
     right: -2,
     bottom: -2,
     borderRadius: KNOB_SIZE / 2 + 2,
-    borderWidth: 2,
+    borderWidth: BORDER_WIDTH.bold,
   },
   hwLabel: {
     fontFamily: FONTS.pixel,
-    fontSize: 7.5,
-    letterSpacing: 0.6,
+    fontSize: FONT_SIZE.pixel,
+    letterSpacing: LETTER_SPACING.tight,
   },
 });

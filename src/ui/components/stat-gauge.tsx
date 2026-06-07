@@ -11,7 +11,7 @@ import Animated, {
 
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
-import { FONTS, useTheme } from '@/ui/theme';
+import { FONT_SIZE, FONTS, ICON_SIZE, LETTER_SPACING, RADIUS, SPACING, useTheme } from '@/ui/theme';
 
 const SEGMENTS = 10;
 
@@ -37,7 +37,7 @@ function AlertBang({ color }: { color: string }) {
   const style = useAnimatedStyle(() => ({ transform: [{ translateY: y.value }] }));
   return (
     <Animated.View style={[styles.bang, style]}>
-      <PixelIcon name="bang" size={6} color={color} />
+      <PixelIcon name="bang" size={ICON_SIZE.xs} color={color} />
     </Animated.View>
   );
 }
@@ -48,7 +48,7 @@ export function StatGauge({ icon, label, value, tone, alert }: Props) {
   return (
     <View style={styles.row}>
       <View style={styles.ico}>
-        <PixelIcon name={icon} size={16} color={tone} />
+        <PixelIcon name={icon} size={ICON_SIZE.md} color={tone} />
         {alert && <AlertBang color={theme.accent} />}
       </View>
       <View style={styles.track}>
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 9,
+    gap: SPACING.sm,
   },
   ico: {
     width: 18,
@@ -82,17 +82,17 @@ const styles = StyleSheet.create({
   track: {
     flex: 1,
     flexDirection: 'row',
-    gap: 3,
+    gap: SPACING.xxs,
   },
   seg: {
     flex: 1,
     height: 13,
-    borderRadius: 3,
+    borderRadius: RADIUS.xs,
   },
   cap: {
     fontFamily: FONTS.uiHeavy,
-    fontSize: 9.5,
-    letterSpacing: 0.5,
+    fontSize: FONT_SIZE.pixel,
+    letterSpacing: LETTER_SPACING.tight,
     textTransform: 'uppercase',
     width: 46,
     textAlign: 'right',

@@ -11,7 +11,7 @@ import Animated, {
 } from 'react-native-reanimated';
 
 import { PixelIcon } from '@/render/pixel-icon';
-import { FONTS, useTheme } from '@/ui/theme';
+import { BORDER_WIDTH, FONT_SIZE, FONTS, ICON_SIZE, LETTER_SPACING, RADIUS, SPACING, useTheme } from '@/ui/theme';
 
 function ThinkingDot({ delay, color }: { delay: number; color: string }) {
   const t = useSharedValue(0);
@@ -78,7 +78,7 @@ export function SpeechBubble({ name, shown, done, thinking }: Props) {
           },
         ]}>
         <View style={styles.nameRow}>
-          <PixelIcon name="sparkle" size={11} color={theme.accent} />
+          <PixelIcon name="sparkle" size={ICON_SIZE.sm} color={theme.accent} />
           <Text style={[styles.name, { color: theme.accent }]}>{name.toLowerCase()}</Text>
         </View>
         <View style={styles.body}>
@@ -105,12 +105,12 @@ export function SpeechBubble({ name, shown, done, thinking }: Props) {
 
 const styles = StyleSheet.create({
   bubble: {
-    borderWidth: 1.5,
-    borderRadius: 14,
-    borderBottomLeftRadius: 5,
-    paddingTop: 9,
-    paddingHorizontal: 13,
-    paddingBottom: 11,
+    borderWidth: BORDER_WIDTH.regular,
+    borderRadius: RADIUS.lg,
+    borderBottomLeftRadius: RADIUS.xs,
+    paddingTop: SPACING.sm,
+    paddingHorizontal: SPACING.md,
+    paddingBottom: SPACING.md,
     marginHorizontal: 2,
   },
   tail: {
@@ -119,21 +119,21 @@ const styles = StyleSheet.create({
     bottom: -6,
     width: 12,
     height: 12,
-    borderRightWidth: 1.5,
-    borderBottomWidth: 1.5,
-    borderBottomRightRadius: 3,
+    borderRightWidth: BORDER_WIDTH.regular,
+    borderBottomWidth: BORDER_WIDTH.regular,
+    borderBottomRightRadius: RADIUS.xs,
     transform: [{ rotate: '45deg' }],
   },
   nameRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    marginBottom: 4,
+    gap: SPACING.xs,
+    marginBottom: SPACING.xs,
   },
   name: {
     fontFamily: FONTS.pixel,
-    fontSize: 8,
-    letterSpacing: 0.8,
+    fontSize: FONT_SIZE.pixel,
+    letterSpacing: LETTER_SPACING.base,
   },
   body: {
     minHeight: 40,
@@ -141,19 +141,19 @@ const styles = StyleSheet.create({
   },
   text: {
     fontFamily: FONTS.display,
-    fontSize: 17,
+    fontSize: FONT_SIZE.speech,
     lineHeight: 22,
   },
   think: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: SPACING.sm,
     height: 20,
   },
   dot: {
     width: 9,
     height: 9,
-    borderRadius: 3,
+    borderRadius: RADIUS.xs,
   },
   caret: {
     width: 8,

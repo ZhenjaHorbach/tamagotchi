@@ -12,7 +12,10 @@ import Animated, {
 
 import { PixelIcon } from '@/render/pixel-icon';
 import { LinearBg, RadialBg } from '@/ui/components/gradient-bg';
-import { fadeOut, useTheme } from '@/ui/theme';
+import { BORDER_WIDTH, fadeOut, ICON_SIZE, RADIUS, useTheme } from '@/ui/theme';
+
+const WINDOW_W = 150;
+const WINDOW_RIM = 3;
 
 const STARS: [number, number][] = [
   [14, 18],
@@ -42,7 +45,7 @@ function Star({ x, y, index }: { x: number; y: number; index: number }) {
   const style = useAnimatedStyle(() => ({ opacity: o.value }));
   return (
     <Animated.View style={[{ position: 'absolute', left: `${x}%`, top: `${y}%` }, style]}>
-      <PixelIcon name="star" size={index % 3 === 0 ? 10 : 7} color={theme.inkSoft} />
+      <PixelIcon name="star" size={index % 3 === 0 ? ICON_SIZE.sm : ICON_SIZE.xs} color={theme.inkSoft} />
     </Animated.View>
   );
 }
@@ -59,7 +62,7 @@ function Raindrop({ x, index }: { x: number; index: number }) {
   }));
   return (
     <Animated.View style={[{ position: 'absolute', left: `${x}%`, top: 0 }, style]}>
-      <PixelIcon name="drop" size={7} color={theme.inkFaint} />
+      <PixelIcon name="drop" size={ICON_SIZE.xs} color={theme.inkFaint} />
     </Animated.View>
   );
 }
@@ -79,7 +82,7 @@ export function Habitat({ children }: { children?: React.ReactNode }) {
           <View style={styles.celest}>
             <PixelIcon
               name={theme.celest}
-              size={theme.celest === 'cloud' ? 40 : 34}
+              size={theme.celest === 'cloud' ? ICON_SIZE.xxl : ICON_SIZE.xl}
               color={theme.night ? theme.ink : sunny ? '#F3D27A' : theme.inkSoft}
             />
           </View>
@@ -95,10 +98,10 @@ export function Habitat({ children }: { children?: React.ReactNode }) {
 
       {/* plants */}
       <View style={[styles.plant, styles.plantL]}>
-        <PixelIcon name="leaf" size={30} color={theme.floorEdge} />
+        <PixelIcon name="leaf" size={ICON_SIZE.xl} color={theme.floorEdge} />
       </View>
       <View style={[styles.plant, styles.plantR]}>
-        <PixelIcon name="flower" size={26} color={theme.accent} />
+        <PixelIcon name="flower" size={ICON_SIZE.lg} color={theme.accent} />
       </View>
 
       {/* floor glow */}
@@ -126,7 +129,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     minHeight: 0,
-    borderRadius: 13,
+    borderRadius: RADIUS.md,
     overflow: 'hidden',
     marginHorizontal: 2,
   },
@@ -134,22 +137,22 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 20,
     alignSelf: 'center',
-    width: 150,
+    width: WINDOW_W,
     height: 104,
-    borderTopLeftRadius: 75,
-    borderTopRightRadius: 75,
-    borderBottomLeftRadius: 14,
-    borderBottomRightRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.13)', // the 3px rim
+    borderTopLeftRadius: WINDOW_W / 2,
+    borderTopRightRadius: WINDOW_W / 2,
+    borderBottomLeftRadius: RADIUS.lg,
+    borderBottomRightRadius: RADIUS.lg,
+    backgroundColor: 'rgba(0,0,0,0.13)', // the rim
     overflow: 'hidden',
   },
   windowInner: {
     flex: 1,
-    margin: 3,
-    borderTopLeftRadius: 72,
-    borderTopRightRadius: 72,
-    borderBottomLeftRadius: 11,
-    borderBottomRightRadius: 11,
+    margin: WINDOW_RIM,
+    borderTopLeftRadius: WINDOW_W / 2 - WINDOW_RIM,
+    borderTopRightRadius: WINDOW_W / 2 - WINDOW_RIM,
+    borderBottomLeftRadius: RADIUS.lg - WINDOW_RIM,
+    borderBottomRightRadius: RADIUS.lg - WINDOW_RIM,
     overflow: 'hidden',
   },
   celest: {
@@ -186,7 +189,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     height: '32%',
-    borderTopWidth: 2,
+    borderTopWidth: BORDER_WIDTH.bold,
     borderTopColor: 'rgba(0,0,0,0.12)',
     overflow: 'hidden',
   },
