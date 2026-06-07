@@ -77,6 +77,7 @@ export default function ToyLayout() {
                 headerShown: false,
                 animation: 'none',
                 contentStyle: { backgroundColor: 'transparent' },
+                freezeOnBlur: true,
               }}
             />
           </ToyFrame>

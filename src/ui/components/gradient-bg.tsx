@@ -15,8 +15,10 @@ type BaseProps = {
 
 function useSize() {
   const [size, setSize] = useState({ w: 0, h: 0 });
-  const onLayout = (e: LayoutChangeEvent) =>
-    setSize({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height });
+  const onLayout = (e: LayoutChangeEvent) => {
+    const { width: w, height: h } = e.nativeEvent.layout;
+    setSize((prev) => (prev.w === w && prev.h === h ? prev : { w, h }));
+  };
   return { size, onLayout };
 }
 
