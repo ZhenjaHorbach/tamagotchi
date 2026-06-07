@@ -1,63 +1,46 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
+import { Button, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { deriveMood } from '@/core';
+import { usePetStore } from '@/state/pet-store';
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
+export default function DebugScreen() {
+  const pet = usePetStore((s) => s.pet);
+  const hydrated = usePetStore((s) => s.hydrated);
+  const feed = usePetStore((s) => s.feed);
+  const play = usePetStore((s) => s.play);
+  const sleep = usePetStore((s) => s.sleep);
+
+  if (!hydrated || !pet) {
     return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
+      <SafeAreaView style={styles.container}>
+        <Text style={styles.stat}>loading…</Text>
+      </SafeAreaView>
     );
   }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <SafeAreaView style={styles.container}>
+      <Text style={styles.title}>tamagotchi / debug</Text>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+      <View style={styles.block}>
+        <Text style={styles.stat}>hunger: {pet.hunger.toFixed(1)}</Text>
+        <Text style={styles.stat}>joy: {pet.joy.toFixed(1)}</Text>
+        <Text style={styles.stat}>energy: {pet.energy.toFixed(1)}</Text>
+        <Text style={styles.mood}>mood: {deriveMood(pet)}</Text>
+      </View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+      <View style={styles.block}>
+        <Text style={styles.meta}>born: {new Date(pet.bornAt).toLocaleString()}</Text>
+        <Text style={styles.meta}>last seen: {new Date(pet.lastSeenAt).toLocaleString()}</Text>
+      </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+      <View style={styles.buttons}>
+        <Button title="Feed" onPress={feed} />
+        <Button title="Play" onPress={play} />
+        <Button title="Sleep" onPress={sleep} />
+      </View>
+    </SafeAreaView>
   );
 }
 
@@ -65,34 +48,32 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+    gap: 24,
   },
   title: {
-    textAlign: 'center',
+    fontSize: 18,
+    fontWeight: 'bold',
   },
-  code: {
-    textTransform: 'uppercase',
+  block: {
+    alignItems: 'center',
+    gap: 4,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  stat: {
+    fontSize: 16,
+    fontVariant: ['tabular-nums'],
+  },
+  mood: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    marginTop: 8,
+  },
+  meta: {
+    fontSize: 12,
+    color: 'gray',
+  },
+  buttons: {
+    flexDirection: 'row',
+    gap: 16,
   },
 });
