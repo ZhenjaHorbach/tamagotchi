@@ -30,11 +30,35 @@ function insideEgg(x: number, y: number): boolean {
 // pixel cracks (grid cells), scattered in 3 clusters revealed in order
 const CRACKS: [number, number][][] = [
   // top-centre vertical zig-zag + splinter
-  [[10, 3], [11, 4], [10, 5], [11, 6], [10, 7], [10, 8], [11, 9], [10, 10], [12, 4], [13, 5]],
+  [
+    [10, 3],
+    [11, 4],
+    [10, 5],
+    [11, 6],
+    [10, 7],
+    [10, 8],
+    [11, 9],
+    [10, 10],
+    [12, 4],
+    [13, 5],
+  ],
   // left flank, angled down + splinter
-  [[7, 8], [6, 9], [7, 10], [6, 11], [6, 12], [6, 7]],
+  [
+    [7, 8],
+    [6, 9],
+    [7, 10],
+    [6, 11],
+    [6, 12],
+    [6, 7],
+  ],
   // lower-right, short angled + splinter
-  [[12, 14], [13, 15], [12, 16], [13, 17], [13, 14]],
+  [
+    [12, 14],
+    [13, 15],
+    [12, 16],
+    [13, 17],
+    [13, 14],
+  ],
 ];
 
 // vertical shade band for a cell row (0 = top light … 3 = bottom shadow)
@@ -53,7 +77,10 @@ const SHELL = ((): FillCell[] => {
     for (let x = 0; x < GW; x++) {
       if (!insideEgg(x, y)) continue;
       const edge =
-        !insideEgg(x - 1, y) || !insideEgg(x + 1, y) || !insideEgg(x, y - 1) || !insideEgg(x, y + 1);
+        !insideEgg(x - 1, y) ||
+        !insideEgg(x + 1, y) ||
+        !insideEgg(x, y - 1) ||
+        !insideEgg(x, y + 1);
       cells.push({ x, y, outline: edge, band: shadeBand(y) });
     }
   }

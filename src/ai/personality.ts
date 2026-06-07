@@ -110,7 +110,12 @@ function pickId(v: unknown, ids: readonly string[]): string | null {
   return ids.find((id) => id === s) ?? null;
 }
 
-function pickFromPool(v: unknown, pool: readonly string[], min: number, max: number): string[] | null {
+function pickFromPool(
+  v: unknown,
+  pool: readonly string[],
+  min: number,
+  max: number,
+): string[] | null {
   if (!Array.isArray(v)) return null;
   const set = new Set(pool.map((p) => p.toLowerCase()));
   const out: string[] = [];
@@ -133,7 +138,11 @@ function asQuirk(v: unknown): string | null {
 /** A short single-token name (model output may be messy → take the first word). */
 function asName(v: unknown): string | null {
   if (typeof v !== 'string') return null;
-  const word = v.trim().replace(/["'.,!]/g, '').split(/\s+/)[0] ?? '';
+  const word =
+    v
+      .trim()
+      .replace(/["'.,!]/g, '')
+      .split(/\s+/)[0] ?? '';
   if (word.length < 2 || word.length > 14) return null;
   return word.charAt(0).toUpperCase() + word.slice(1);
 }
@@ -164,13 +173,34 @@ export function parsePersonality(raw: string): Personality | null {
   const quirk = asQuirk(obj.quirk);
   const name = asName(obj.name);
 
-  if (!name || !temperament || !boldness || !energyType || !appetite || !neediness || !playfulness || !rhythm) {
+  if (
+    !name ||
+    !temperament ||
+    !boldness ||
+    !energyType ||
+    !appetite ||
+    !neediness ||
+    !playfulness ||
+    !rhythm
+  ) {
     return null;
   }
   if (!likesFood || !quirk) return null;
 
   const dislikes = pickFromPool(obj.dislikes, FOOD_DISLIKES, 0, 1) ?? [];
-  return { name, temperament, boldness, energyType, appetite, neediness, playfulness, rhythm, likesFood, dislikes, quirk };
+  return {
+    name,
+    temperament,
+    boldness,
+    energyType,
+    appetite,
+    neediness,
+    playfulness,
+    rhythm,
+    likesFood,
+    dislikes,
+    quirk,
+  };
 }
 
 // ── fallback ─────────────────────────────────────────────────────────────────

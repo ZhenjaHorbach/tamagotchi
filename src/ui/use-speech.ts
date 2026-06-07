@@ -71,7 +71,8 @@ export function useSpeech() {
         return;
       }
 
-      const hoursAway = event === 'greet' ? Math.max(0, (Date.now() - pet.lastSeenAt) / HOUR_MS) : 0;
+      const hoursAway =
+        event === 'greet' ? Math.max(0, (Date.now() - pet.lastSeenAt) / HOUR_MS) : 0;
       const prompt = buildReplyPrompt(
         card,
         { event, hunger: pet.hunger, joy: pet.joy, energy: pet.energy, hoursAway },

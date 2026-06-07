@@ -1,6 +1,6 @@
 // Habitat — the main pet screen.
 
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
@@ -20,6 +20,7 @@ import { buttonTones, gaugeTones, SPACING, useSurfaces } from '@/ui/theme';
 
 export default function HabitatScreen() {
   const { t } = useTranslation();
+  const router = useRouter();
   const surfaces = useSurfaces();
   const name = usePetName();
   const pet = usePetStore((s) => s.pet);
@@ -57,7 +58,7 @@ export default function HabitatScreen() {
   return (
     <View style={styles.home}>
       <View style={styles.topbar}>
-        <Nameplate name={name} mood={mood} />
+        <Nameplate name={name} mood={mood} onPress={() => router.push('/card')} />
       </View>
 
       <SpeechBubble

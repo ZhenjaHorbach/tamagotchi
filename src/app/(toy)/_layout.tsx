@@ -32,6 +32,7 @@ const TABS = [
 const TAB_FOR_PATH: Record<string, string> = {
   '/shelf': '/shelf',
   '/': '/',
+  '/card': '/', // personality card lives under the habitat tab
   '/settings': '/settings',
   '/ai-lab': '/settings',
   '/language': '/settings',

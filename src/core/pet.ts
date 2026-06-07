@@ -27,7 +27,11 @@ export function createPet(now: number): PetState {
  * Clock-tamper safe: a clock rolled backwards yields zero elapsed time,
  * never negative decay. Personality modifiers scale the per-hour rates.
  */
-export function applyElapsed(s: PetState, now: number, mods: Modifiers = NEUTRAL_MODIFIERS): PetState {
+export function applyElapsed(
+  s: PetState,
+  now: number,
+  mods: Modifiers = NEUTRAL_MODIFIERS,
+): PetState {
   const elapsedMs = Math.max(0, now - s.lastSeenAt);
   const hours = elapsedMs / HOUR_MS;
   return {

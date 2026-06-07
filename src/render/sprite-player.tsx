@@ -33,7 +33,14 @@ export function SpritePlayer({ mood, seed, size = 98 }: Props) {
     <Canvas style={{ width: size, height: size }} pointerEvents="none">
       {frames[frame].map((c, i) => (
         // 1.02 overlap avoids hairline seams between pixels
-        <Rect key={i} x={c.x * cell} y={c.y * cell} width={cell * 1.02} height={cell * 1.02} color={c.color} />
+        <Rect
+          key={i}
+          x={c.x * cell}
+          y={c.y * cell}
+          width={cell * 1.02}
+          height={cell * 1.02}
+          color={c.color}
+        />
       ))}
     </Canvas>
   );

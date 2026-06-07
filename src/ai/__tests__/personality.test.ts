@@ -34,7 +34,9 @@ describe('parsePersonality', () => {
   });
 
   it('is case-insensitive on ids', () => {
-    expect(parsePersonality(JSON.stringify({ ...VALID, temperament: 'SASSY' }))?.temperament).toBe('sassy');
+    expect(parsePersonality(JSON.stringify({ ...VALID, temperament: 'SASSY' }))?.temperament).toBe(
+      'sassy',
+    );
   });
 
   it('rejects an unknown axis id', () => {
@@ -42,7 +44,9 @@ describe('parsePersonality', () => {
   });
 
   it('caps likesFood at 2 and dedupes', () => {
-    const p = parsePersonality(JSON.stringify({ ...VALID, likesFood: ['fish', 'fish', 'bread', 'honey'] }));
+    const p = parsePersonality(
+      JSON.stringify({ ...VALID, likesFood: ['fish', 'fish', 'bread', 'honey'] }),
+    );
     expect(p?.likesFood).toEqual(['fish', 'bread']);
   });
 
@@ -62,7 +66,9 @@ describe('parsePersonality', () => {
   });
 
   it('takes the first word of a messy name and capitalizes it', () => {
-    expect(parsePersonality(JSON.stringify({ ...VALID, name: 'sir fluffington' }))?.name).toBe('Sir');
+    expect(parsePersonality(JSON.stringify({ ...VALID, name: 'sir fluffington' }))?.name).toBe(
+      'Sir',
+    );
     expect(parsePersonality(JSON.stringify({ ...VALID, name: 'pip!' }))?.name).toBe('Pip');
   });
 
@@ -117,7 +123,9 @@ describe('fallbackPersonality', () => {
       expect(AXIS_IDS.appetite).toContain(p.appetite);
       expect(AXIS_IDS.rhythm).toContain(p.rhythm);
       p.likesFood.forEach((f) => expect(FOOD_LIKES).toContain(f as (typeof FOOD_LIKES)[number]));
-      p.dislikes.forEach((d) => expect(FOOD_DISLIKES).toContain(d as (typeof FOOD_DISLIKES)[number]));
+      p.dislikes.forEach((d) =>
+        expect(FOOD_DISLIKES).toContain(d as (typeof FOOD_DISLIKES)[number]),
+      );
       expect(p.likesFood.length).toBeGreaterThan(0);
     }
   });

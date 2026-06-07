@@ -1,5 +1,5 @@
 import { APPETITES, ENERGY_TYPES, NEEDINESS, PLAYFULNESS } from '../trait-catalog';
-import { HOUR_MS, NEWBORN_STATS , MOOD_THRESHOLDS } from '../constants';
+import { HOUR_MS, NEWBORN_STATS, MOOD_THRESHOLDS } from '../constants';
 import { applyElapsed, createPet, feed, play } from '../pet';
 import { NEUTRAL_MODIFIERS, selectionToModifiers, type Modifiers } from '../traits';
 
@@ -92,9 +92,24 @@ describe('balance rule', () => {
               neediness: n.id,
               playfulness: p.id,
             });
-            const hunger = hoursToCross(NEWBORN_STATS.hunger, 4 * m.hungerDecay, MOOD_THRESHOLDS.hungryHungerAbove, 'up');
-            const energy = hoursToCross(NEWBORN_STATS.energy, -3 * m.energyDecay, MOOD_THRESHOLDS.sleepyEnergyBelow, 'down');
-            const joy = hoursToCross(NEWBORN_STATS.joy, -2 * m.joyDecay, MOOD_THRESHOLDS.sadJoyBelow, 'down');
+            const hunger = hoursToCross(
+              NEWBORN_STATS.hunger,
+              4 * m.hungerDecay,
+              MOOD_THRESHOLDS.hungryHungerAbove,
+              'up',
+            );
+            const energy = hoursToCross(
+              NEWBORN_STATS.energy,
+              -3 * m.energyDecay,
+              MOOD_THRESHOLDS.sleepyEnergyBelow,
+              'down',
+            );
+            const joy = hoursToCross(
+              NEWBORN_STATS.joy,
+              -2 * m.joyDecay,
+              MOOD_THRESHOLDS.sadJoyBelow,
+              'down',
+            );
             expect(hunger).toBeGreaterThan(MIN_HOURS);
             expect(energy).toBeGreaterThan(MIN_HOURS);
             expect(joy).toBeGreaterThan(MIN_HOURS);

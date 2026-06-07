@@ -82,7 +82,10 @@ export function HatchScreen({ card, onReveal, onComplete }: Props) {
   };
 
   const eggStyle = useAnimatedStyle(() => ({
-    transform: [{ rotate: `${idle.value * 2 + wobble.value * 4}deg` }, { translateX: wobble.value * 5 }],
+    transform: [
+      { rotate: `${idle.value * 2 + wobble.value * 4}deg` },
+      { translateX: wobble.value * 5 },
+    ],
   }));
 
   const cracks = Math.min(3, taps);
@@ -151,7 +154,11 @@ function Reveal({ card, onComplete }: { card: Personality | null; onComplete: ()
   return (
     <View style={styles.reveal}>
       <Animated.View style={[styles.rays, raysStyle]} pointerEvents="none">
-        <RadialBg colors={[theme.accentSoft, fadeOut(theme.accentSoft)]} radius={0.5} positions={[0, 0.7]} />
+        <RadialBg
+          colors={[theme.accentSoft, fadeOut(theme.accentSoft)]}
+          radius={0.5}
+          positions={[0, 0.7]}
+        />
       </Animated.View>
 
       <Animated.View style={popStyle}>
