@@ -1,7 +1,6 @@
 # AI Tamagotchi — Build Spec (4-day MVP)
 
 ## Goal
-
 An offline-first, on-device AI virtual pet built in React Native. A pixel-art
 creature whose stats change over time; it animates by mood and (from day 3) talks
 with a generated personality using a small language model running fully on-device.
@@ -11,7 +10,6 @@ Portfolio intent: demonstrate **on-device LLM inside a React Native app**. RN is
 point — do not move logic into a game engine.
 
 ## Tech stack (pinned)
-
 - React Native + **Expo SDK 54+**, New Architecture, Hermes, TypeScript
 - **Custom dev-build / dev-client required** — Expo Go will NOT work (native modules)
 - State: **Zustand**
@@ -24,7 +22,6 @@ point — do not move logic into a game engine.
   ALL on-device models (LLM, and later CLIP/Whisper). Do not add a second LLM library.
 
 ## Architecture principles (follow strictly)
-
 1. **Deterministic core, AI wrapper.** All game logic (stats, time, mood, actions)
    lives in a pure, framework-agnostic `/core` module with zero React/Native imports.
    The app must be fully functional WITHOUT any AI. The SLM is a layer on top that
@@ -43,7 +40,6 @@ point — do not move logic into a game engine.
    data (stats) instantly + a "thinking" animation; stream reply tokens as they arrive.
 
 ## Core contract (implement in /core, pure + unit-tested)
-
 ```ts
 type Mood = 'happy' | 'neutral' | 'sad' | 'sleepy' | 'hungry';
 
@@ -62,20 +58,30 @@ feed(s: PetState): PetState;
 play(s: PetState): PetState;
 sleep(s: PetState): PetState;
 ```
-
 Decay (starting point, tune later): hunger +4/h, energy −3/h, joy −2/h.
 Mood priority: energy<20 → sleepy; hunger>75 → hungry; joy>70 → happy; joy<30 → sad; else neutral.
 
 ## Visual layer
-
 - Sprite sheet PNG (transparent), one mood = one frame strip. Map `deriveMood(state)`
   → clip → Skia frame player (`drawImageRect`, frame loop on a clock).
 - Pixel art must use **nearest-neighbor** upscale (`FilterMode.Nearest`) — no smoothing.
 - If real art (PixelLab states: happy/sad/sleepy/hungry/idle) isn't ready, use colored
   placeholder shapes per mood. The `mood → animation` pipeline matters more than the art.
 
-## SCOPE GUARDRAILS — do NOT build in these 4 days
+## Navigation & screens
+Bottom tab bar with three tabs:
+- **Home** — collection / shelf of pets. MVP: shows the single pet only (no creation/switching).
+- **Habitat** — the active pet's main screen (the core screen: pet slot, stats, actions, speech). Default tab.
+- **Settings** — notifications toggle, privacy ("runs on your device"), reset pet, about/AI info.
 
+The **personality card** opens from the top bar on the Habitat screen (the `card >` affordance next
+to the pet name) — it is NOT a tab. The **camera** is a small corner icon on Habitat (future phase),
+not a tab and not a primary action.
+
+## SCOPE GUARDRAILS — do NOT build in these 4 days
+- Single pet only. Multi-pet collection (creating/switching pets) is post-MVP — the Home tab
+  shows the one pet for now. Don't build pet creation/switching, but don't hardcode assumptions
+  that would block adding it later (e.g. key the pet by id rather than assuming a lone global).
 - No camera / vision / CLIP. No web target. No RAG memory. No daily reflection.
 - No personality evolution / mood drift / unlockable traits. (Birth personality only.)
 - No voice (Whisper/TTS). No cloud/Claude API fallback. No Supabase.
@@ -85,7 +91,6 @@ Mood priority: energy<20 → sleepy; hunger>75 → hungry; joy>70 → happy; joy
 ---
 
 ## Day 1 — Core logic (no device, no art)
-
 - Scaffold Expo (TS) + ESLint/Prettier + Jest + Zustand; run on simulator.
 - Implement `/core`: types, decay constants, `clamp`, `applyElapsed`, `deriveMood`, `feed`/`play`/`sleep` as pure functions.
 - Unit tests for core: decay over N hours, mood thresholds, clock-tamper guard.
@@ -95,16 +100,14 @@ Mood priority: energy<20 → sleepy; hunger>75 → hungry; joy>70 → happy; joy
 - **Done:** stats reflect time away; actions persist; survives restart and time changes.
 
 ## Day 2 — Visual layer (Phase 1 complete)
-
 - Add `react-native-skia`; create the **first dev-build** (prebuild/dev-client) — schedule this first, it's the day's main time risk. Render a static sprite (placeholder ok).
 - Frame player: load sheet, `drawImageRect`, frame loop, nearest-neighbor upscale.
 - `mood → clip` mapping; wire actions to animation (feed → stat drop → mood → frames change live).
-- Minimal layout: pet centered, stat bars, action buttons.
+- Minimal layout: pet centered, stat bars, action buttons. Add the bottom tab shell (Home / Habitat / Settings) — Habitat is the real screen; Home shows the single pet; Settings can be a stub.
 - Stretch: `expo-notifications` local "hungry" reminder — schedule time computed from core decay; reschedule on `AppState`; request permissions.
 - **Done:** animated pet reacting to stats/actions, survives restart, sends offline reminder. This is a complete, demoable project on its own.
 
 ## Day 3 — AI backbone (highest-risk day)
-
 - Goal is deliberately minimal: get ONE token out of an on-device model.
 - Add `react-native-executorch`; new dev-build with native module (may take half a day — do it first); download SLM.
 - `useLLM` with a hardcoded prompt → text on screen. Prove the pipeline runs.
@@ -113,7 +116,6 @@ Mood priority: energy<20 → sleepy; hunger>75 → hungry; joy>70 → happy; joy
 - **Done:** model runs locally and streams text. Ugly, but it's the technical spine.
 
 ## Day 4 — Bring it to life (AI in the loop)
-
 - Birth personality (structured output): one SLM call → JSON
   `{ temperament, speech_style, likes_food[], dislikes[], quirk }` → store in SQLite.
   Gotcha: small models produce malformed JSON — keep the schema tiny, parse with validation,
@@ -126,18 +128,17 @@ Mood priority: energy<20 → sleepy; hunger>75 → hungry; joy>70 → happy; joy
 - **Done:** pet with a generated character reacts live, facts are honest, fully offline.
 
 ## Suggested file layout
-
 ```
 /core            pure logic (no RN imports) + tests
 /db              sqlite schema + repo
 /state           zustand store
 /render          skia sprite player + mood→clip map
 /ai              useLLM wrapper, personality, tool-use facts (day 3+)
-/screens         pet screen, debug screen
+/screens         home (pet shelf), habitat (main), settings, debug
+/nav             bottom tab bar (Home / Habitat / Settings)
 ```
 
 ## Notes for the agent
-
 - Build day by day; do not jump ahead into guardrail items.
 - Keep `/core` pure and fully covered by tests — it is the foundation everything else trusts.
 - Two hard time-risks: first Skia dev-build (day 2) and executorch + model (day 3). Surface

@@ -11,6 +11,8 @@ type PetStore = {
   feed: () => Promise<void>;
   play: () => Promise<void>;
   sleep: () => Promise<void>;
+  /** Say goodbye: replace the pet with a freshly born one. */
+  reset: () => Promise<void>;
 };
 
 export const usePetStore = create<PetStore>((set, get) => {
@@ -39,5 +41,11 @@ export const usePetStore = create<PetStore>((set, get) => {
     feed: () => commit(feed),
     play: () => commit(play),
     sleep: () => commit(sleep),
+
+    reset: async () => {
+      const pet = createPet(Date.now());
+      set({ pet });
+      await savePet(pet);
+    },
   };
 });
