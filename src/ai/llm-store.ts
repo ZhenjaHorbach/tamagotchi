@@ -2,10 +2,29 @@
 // any screen: navigation can never interrupt a download or a generation.
 // Built on the hookless LLMModule API of react-native-executorch.
 
+import * as Device from 'expo-device';
 import { LLMModule, models } from 'react-native-executorch';
 import { create } from 'zustand';
 
-const MODEL = models.llm.qwen3_1_7b();
+const GB = 1024 ** 3;
+
+/**
+ * Pick the model for THIS device by available RAM — smaller models are far
+ * lighter and noticeably faster, so only roomy phones get the smartest one.
+ * Three tiers, all quantized (smaller download + memory, faster inference):
+ *   ≥ 6 GB → qwen3-1.7b      (smartest)
+ *   ≥ 4 GB → qwen3.5-0.8b    (newer, balanced)
+ *   else   → qwen3-0.6b      (most primitive, lightest)
+ * `totalMemory` is null on web/unknown → assume the weakest tier.
+ */
+function pickModel() {
+  const mem = Device.totalMemory ?? 0;
+  if (mem >= 6 * GB) return models.llm.qwen3_1_7b({ quant: true });
+  if (mem >= 4 * GB) return models.llm.qwen3_5_0_8b({ quant: true });
+  return models.llm.qwen3_0_6b({ quant: true });
+}
+
+const MODEL = pickModel();
 
 /** Model id straight from the library config, shown in the AI Lab. */
 export const MODEL_LABEL = MODEL.modelName;
@@ -16,15 +35,18 @@ export type GenConfig = {
   topP?: number;
   minP?: number;
   repetitionPenalty?: number;
+  maxTokens?: number;
 };
 
 // High temperature for variety; minP trims the incoherent long tail so the
-// extra randomness stays funny rather than gibberish.
+// extra randomness stays funny rather than gibberish. maxTokens caps a one-line
+// reply (~24 words) so generation can't run away on a low-end device.
 export const REPLY_CONFIG: GenConfig = {
   temperature: 1.1,
   topP: 0.95,
   minP: 0.03,
   repetitionPenalty: 1.1,
+  maxTokens: 128,
 };
 // Lower temperature → the birth JSON parses reliably (still some name/quirk flair).
 export const PERSONALITY_CONFIG: GenConfig = { temperature: 0.7, topP: 0.9 };
@@ -65,6 +87,9 @@ type LlmStore = {
 // not serializable and never drive renders directly.
 let llm: Awaited<ReturnType<typeof LLMModule.fromModelName>> | null = null;
 let timing = { startedAt: 0, firstTokenAt: 0, tokens: 0 };
+// soft per-generation token cap (0 = unlimited); enforced in the token callback
+let tokenLimit = 0;
+let interrupted = false;
 
 export const useLlmStore = create<LlmStore>((set, get) => ({
   status: 'idle',
@@ -91,6 +116,10 @@ export const useLlmStore = create<LlmStore>((set, get) => ({
             }));
           }
           set((s) => ({ rawResponse: s.rawResponse + token }));
+          if (tokenLimit && !interrupted && timing.tokens >= tokenLimit) {
+            interrupted = true;
+            llm?.interrupt();
+          }
         },
       );
       set({ status: 'ready' });
@@ -102,9 +131,13 @@ export const useLlmStore = create<LlmStore>((set, get) => ({
   generate: async (prompt: string, config?: GenConfig, system?: string) => {
     if (!llm || get().generating) return null;
     timing = { startedAt: Date.now(), firstTokenAt: 0, tokens: 0 };
+    // split our soft cap out of the real generationConfig the model accepts
+    const { maxTokens, ...genConfig } = config ?? {};
+    tokenLimit = maxTokens ?? 0;
+    interrupted = false;
     set({ generating: true, rawResponse: '', metrics: EMPTY_METRICS });
     try {
-      if (config) llm.configure({ generationConfig: config });
+      if (config) llm.configure({ generationConfig: genConfig });
       const text = await llm.generate([
         { role: 'system', content: system ?? DEFAULT_SYSTEM },
         { role: 'user', content: prompt },
@@ -124,6 +157,7 @@ export const useLlmStore = create<LlmStore>((set, get) => ({
       set({ error: String(e) });
       return null;
     } finally {
+      tokenLimit = 0;
       set({ generating: false });
     }
   },
