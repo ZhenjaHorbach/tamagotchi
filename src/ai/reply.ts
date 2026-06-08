@@ -15,7 +15,8 @@ export type SpeechEvent =
   | 'hungry'
   | 'sad'
   | 'happy'
-  | 'neutral';
+  | 'neutral'
+  | 'camera';
 
 export type ReplyContext = {
   event: SpeechEvent;
@@ -37,6 +38,9 @@ const EVENT_DIRECTIVE: Record<SpeechEvent, string> = {
   sad: 'You feel lonely and a bit down. React to feeling blue.',
   happy: 'You feel wonderful. React to your great mood.',
   neutral: 'Nothing special is happening. Make a small idle remark.',
+  camera:
+    "Your human pressed a button, but you're already full, rested and happy — buttons can't boost you further. " +
+    'Cheekily tell them to point the CAMERA at something fun instead, to delight you more.',
 };
 
 const VOICE = {

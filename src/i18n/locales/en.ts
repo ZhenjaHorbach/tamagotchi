@@ -107,6 +107,10 @@ const en = {
       'just pottering. i rearranged a leaf. big day.',
       'do you ever just… vibe? i’m vibing.',
     ],
+    camera: [
+      'i’m completely topped up — show me something with the camera instead!',
+      'buttons can’t help now. point that camera at something fun!',
+    ],
   },
   card: {
     energy: 'Energy',

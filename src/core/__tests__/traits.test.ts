@@ -1,5 +1,12 @@
 import { APPETITES, ENERGY_TYPES, NEEDINESS, PLAYFULNESS } from '../trait-catalog';
-import { HOUR_MS, NEWBORN_STATS, MOOD_THRESHOLDS } from '../constants';
+import {
+  ACTION_EFFECTS,
+  BUTTON_CAP,
+  DECAY_PER_HOUR,
+  HOUR_MS,
+  NEWBORN_STATS,
+  MOOD_THRESHOLDS,
+} from '../constants';
 import { applyElapsed, createPet, feed, play } from '../pet';
 import { NEUTRAL_MODIFIERS, selectionToModifiers, type Modifiers } from '../traits';
 
@@ -52,22 +59,21 @@ describe('modifiers affect the core', () => {
   const glutton: Modifiers = { ...NEUTRAL_MODIFIERS, hungerDecay: 1.5, feedGain: 1.3 };
 
   it('scales hunger decay', () => {
-    const after = applyElapsed(createPet(T0), T0 + 10 * HOUR_MS, glutton);
-    // 20 + 4 * 1.5 * 10 = 80
-    expect(after.hunger).toBeCloseTo(80);
+    const H = 4;
+    const after = applyElapsed(createPet(T0), T0 + H * HOUR_MS, glutton);
+    expect(after.hunger).toBeCloseTo(NEWBORN_STATS.hunger + DECAY_PER_HOUR.hunger * 1.5 * H);
   });
 
-  it('scales the Feed action', () => {
+  it('scales the Feed action (within the button cap)', () => {
     const fed = feed({ ...createPet(T0), hunger: 80 }, glutton);
-    // 80 + (-30 * 1.3) = 41
-    expect(fed.hunger).toBeCloseTo(41);
+    expect(fed.hunger).toBeCloseTo(80 + ACTION_EFFECTS.feed.hunger * 1.3);
   });
 
-  it('scales Play energy cost and joy gain', () => {
+  it('scales Play energy cost, and joy gain is still capped', () => {
     const energetic: Modifiers = { ...NEUTRAL_MODIFIERS, playEnergyCost: 0.7, playJoyGain: 1.5 };
     const played = play({ ...createPet(T0), joy: 50, energy: 50 }, energetic);
-    expect(played.joy).toBeCloseTo(50 + 25 * 1.5); // 87.5
-    expect(played.energy).toBeCloseTo(50 + -10 * 0.7); // 43
+    expect(played.joy).toBeCloseTo(BUTTON_CAP); // 50 + 10*1.5 = 65 → capped at 60
+    expect(played.energy).toBeCloseTo(50 + ACTION_EFFECTS.play.energy * 0.7);
   });
 });
 

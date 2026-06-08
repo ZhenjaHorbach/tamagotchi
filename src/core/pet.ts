@@ -1,5 +1,6 @@
 import {
   ACTION_EFFECTS,
+  BUTTON_CAP,
   DECAY_PER_HOUR,
   HOUR_MS,
   MOOD_THRESHOLDS,
@@ -11,6 +12,17 @@ import type { Mood, PetState } from './types';
 /** Clamp a stat into the 0..100 range. */
 export function clamp(n: number): number {
   return Math.min(100, Math.max(0, n));
+}
+
+// Buttons raise a good stat toward BUTTON_CAP but never past it — and never
+// drag down a stat already above the cap (e.g. from birth or, later, the
+// camera). delta >= 0 raises joy/energy; delta <= 0 lowers hunger (= fullness).
+function raiseCapped(current: number, delta: number): number {
+  return Math.min(clamp(current + delta), Math.max(BUTTON_CAP, current));
+}
+function lowerHungerCapped(current: number, delta: number): number {
+  const floor = 100 - BUTTON_CAP; // best hunger reachable by buttons
+  return Math.max(clamp(current + delta), Math.min(floor, current));
 }
 
 /** Create a freshly born pet. */
@@ -55,17 +67,17 @@ export function deriveMood(s: PetState): Mood {
 export function feed(s: PetState, mods: Modifiers = NEUTRAL_MODIFIERS): PetState {
   return {
     ...s,
-    // ACTION_EFFECTS.feed.hunger is negative (fills the belly) — feedGain scales it
-    hunger: clamp(s.hunger + ACTION_EFFECTS.feed.hunger * mods.feedGain),
-    joy: clamp(s.joy + ACTION_EFFECTS.feed.joy),
+    // feed.hunger is negative (fills the belly) — feedGain scales it; capped
+    hunger: lowerHungerCapped(s.hunger, ACTION_EFFECTS.feed.hunger * mods.feedGain),
+    joy: raiseCapped(s.joy, ACTION_EFFECTS.feed.joy),
   };
 }
 
 export function play(s: PetState, mods: Modifiers = NEUTRAL_MODIFIERS): PetState {
   return {
     ...s,
-    joy: clamp(s.joy + ACTION_EFFECTS.play.joy * mods.playJoyGain),
-    // ACTION_EFFECTS.play.energy is negative — playEnergyCost scales the drain
+    joy: raiseCapped(s.joy, ACTION_EFFECTS.play.joy * mods.playJoyGain),
+    // energy/hunger here are costs (worse) — not capped, just clamped
     energy: clamp(s.energy + ACTION_EFFECTS.play.energy * mods.playEnergyCost),
     hunger: clamp(s.hunger + ACTION_EFFECTS.play.hunger),
   };
@@ -74,6 +86,6 @@ export function play(s: PetState, mods: Modifiers = NEUTRAL_MODIFIERS): PetState
 export function sleep(s: PetState): PetState {
   return {
     ...s,
-    energy: clamp(s.energy + ACTION_EFFECTS.sleep.energy),
+    energy: raiseCapped(s.energy, ACTION_EFFECTS.sleep.energy),
   };
 }

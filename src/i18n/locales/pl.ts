@@ -102,6 +102,10 @@ const pl: typeof en = {
       'po prostu się krzątam. przełożyłem listek.',
       'czy ty czasem po prostu… wibujesz? ja wibuję.',
     ],
+    camera: [
+      'jestem już naładowany — lepiej pokaż mi coś przez kamerę!',
+      'przyciski już nie pomogą. skieruj kamerę na coś fajnego!',
+    ],
   },
   card: {
     energy: 'Energia',

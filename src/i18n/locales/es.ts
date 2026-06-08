@@ -102,6 +102,10 @@ const es: typeof en = {
       'solo trasteando. recoloqué una hoja.',
       '¿alguna vez solo… fluyes? yo estoy fluyendo.',
     ],
+    camera: [
+      '¡ya estoy a tope — mejor enséñame algo con la cámara!',
+      'los botones ya no ayudan. ¡apunta la cámara a algo divertido!',
+    ],
   },
   card: {
     energy: 'Energía',

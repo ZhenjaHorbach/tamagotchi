@@ -5,7 +5,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 
-import { deriveMood } from '@/core';
+import { BUTTON_CAP, deriveMood } from '@/core';
 import { usePetStore } from '@/state/pet-store';
 import { ChunkyButton } from '@/ui/components/chunky-button';
 import { Habitat } from '@/ui/components/habitat';
@@ -15,7 +15,7 @@ import { hashSeed } from '@/render/sprite-gen';
 import { SpeechBubble } from '@/ui/components/speech-bubble';
 import { StatGauge } from '@/ui/components/stat-gauge';
 import { usePetName } from '@/ai/personality-store';
-import { useSpeech } from '@/ui/use-speech';
+import { useSpeech, type SpeechEvent } from '@/ui/use-speech';
 import { buttonTones, gaugeTones, SPACING, useSurfaces } from '@/ui/theme';
 
 export default function HabitatScreen() {
@@ -54,6 +54,8 @@ export default function HabitatScreen() {
 
   const fullness = 100 - pet.hunger;
   const tooTired = mood === 'sleepy';
+
+  const speakFor = (event: SpeechEvent, capped: boolean) => speak(capped ? 'camera' : event);
 
   return (
     <View style={styles.home}>
@@ -96,8 +98,13 @@ export default function HabitatScreen() {
           label={t('habitat.feed')}
           tone={buttons.feed}
           onPress={async () => {
+            const capped = pet.hunger <= 100 - BUTTON_CAP;
+            if (capped) {
+              speakFor('feed', capped);
+              return;
+            }
             await feed();
-            speak('feed');
+            speakFor('feed', capped);
           }}
         />
         <ChunkyButton
@@ -106,8 +113,13 @@ export default function HabitatScreen() {
           tone={buttons.play}
           disabled={tooTired}
           onPress={async () => {
+            const capped = pet.joy >= BUTTON_CAP;
+            if (capped) {
+              speakFor('play', capped);
+              return;
+            }
             await play();
-            speak('play');
+            speakFor('play', capped);
           }}
         />
         <ChunkyButton
@@ -115,8 +127,13 @@ export default function HabitatScreen() {
           label={t('habitat.sleep')}
           tone={buttons.sleep}
           onPress={async () => {
+            const capped = pet.energy >= BUTTON_CAP;
+            if (capped) {
+              speakFor('sleep', capped);
+              return;
+            }
             await sleep();
-            speak('sleep');
+            speakFor('sleep', capped);
           }}
         />
       </View>

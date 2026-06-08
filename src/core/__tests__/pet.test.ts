@@ -1,4 +1,4 @@
-import { ACTION_EFFECTS, HOUR_MS, NEWBORN_STATS } from '../constants';
+import { ACTION_EFFECTS, BUTTON_CAP, DECAY_PER_HOUR, HOUR_MS, NEWBORN_STATS } from '../constants';
 import { applyElapsed, clamp, createPet, deriveMood, feed, play, sleep } from '../pet';
 import type { PetState } from '../types';
 
@@ -29,20 +29,20 @@ describe('createPet', () => {
 });
 
 describe('applyElapsed', () => {
-  it('decays stats over N hours (hunger +4/h, energy -3/h, joy -2/h)', () => {
-    const pet = makePet();
-    const after = applyElapsed(pet, T0 + 10 * HOUR_MS);
-    expect(after.hunger).toBeCloseTo(90); // 50 + 4*10
-    expect(after.energy).toBeCloseTo(20); // 50 - 3*10
-    expect(after.joy).toBeCloseTo(30); // 50 - 2*10
-    expect(after.lastSeenAt).toBe(T0 + 10 * HOUR_MS);
+  it('decays stats at the per-hour rates (computed from constants)', () => {
+    const H = 3; // short enough that nothing clamps
+    const after = applyElapsed(makePet(), T0 + H * HOUR_MS);
+    expect(after.hunger).toBeCloseTo(50 + DECAY_PER_HOUR.hunger * H);
+    expect(after.energy).toBeCloseTo(50 + DECAY_PER_HOUR.energy * H);
+    expect(after.joy).toBeCloseTo(50 + DECAY_PER_HOUR.joy * H);
+    expect(after.lastSeenAt).toBe(T0 + H * HOUR_MS);
   });
 
   it('supports fractional hours', () => {
     const after = applyElapsed(makePet(), T0 + HOUR_MS / 2);
-    expect(after.hunger).toBeCloseTo(52);
-    expect(after.energy).toBeCloseTo(48.5);
-    expect(after.joy).toBeCloseTo(49);
+    expect(after.hunger).toBeCloseTo(50 + DECAY_PER_HOUR.hunger * 0.5);
+    expect(after.energy).toBeCloseTo(50 + DECAY_PER_HOUR.energy * 0.5);
+    expect(after.joy).toBeCloseTo(50 + DECAY_PER_HOUR.joy * 0.5);
   });
 
   it('clamps stats at the 0..100 bounds after a long absence', () => {
@@ -117,10 +117,6 @@ describe('actions', () => {
     expect(after.joy).toBe(50 + ACTION_EFFECTS.feed.joy);
   });
 
-  it('feed clamps hunger at 0', () => {
-    expect(feed(makePet({ hunger: 10 })).hunger).toBe(0);
-  });
-
   it('play raises joy, costs energy and adds hunger', () => {
     const after = play(makePet());
     expect(after.joy).toBe(50 + ACTION_EFFECTS.play.joy);
@@ -128,9 +124,27 @@ describe('actions', () => {
     expect(after.hunger).toBe(50 + ACTION_EFFECTS.play.hunger);
   });
 
-  it('sleep restores energy, clamped at 100', () => {
-    expect(sleep(makePet()).energy).toBe(90);
-    expect(sleep(makePet({ energy: 80 })).energy).toBe(100);
+  it('sleep restores energy toward the button cap', () => {
+    expect(sleep(makePet({ energy: 50 })).energy).toBe(50 + ACTION_EFFECTS.sleep.energy);
+  });
+
+  // buttons can lift a good stat only up to BUTTON_CAP — 60→100 is the camera's job
+  describe('button cap (max 60% via buttons)', () => {
+    it('sleep cannot push energy past the cap', () => {
+      expect(sleep(makePet({ energy: BUTTON_CAP - 5 })).energy).toBe(BUTTON_CAP);
+    });
+    it('sleep leaves an already-high stat untouched', () => {
+      expect(sleep(makePet({ energy: 80 })).energy).toBe(80);
+    });
+    it('play cannot push joy past the cap', () => {
+      expect(play(makePet({ joy: BUTTON_CAP - 5 })).joy).toBe(BUTTON_CAP);
+    });
+    it('feed cannot lower hunger past the fullness cap (100 − cap)', () => {
+      expect(feed(makePet({ hunger: 45 })).hunger).toBe(100 - BUTTON_CAP);
+    });
+    it('feed leaves an already-full pet untouched', () => {
+      expect(feed(makePet({ hunger: 10 })).hunger).toBe(10);
+    });
   });
 
   it('actions are pure: input is not mutated', () => {
