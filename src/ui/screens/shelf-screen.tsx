@@ -4,8 +4,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Mood } from '@/core';
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
+import { useLlmStore } from '@/ai/llm-store';
 import { hashSeed } from '@/render/sprite-gen';
 import { SpritePlayer } from '@/render/sprite-player';
+import { ModelLoadingBar } from '@/ui/components/model-loading';
 import { LinearBg, RadialBg } from '@/ui/components/gradient-bg';
 import {
   BORDER_WIDTH,
@@ -67,8 +69,17 @@ function PetDome({ name, mood, onPress }: { name: string; mood: Mood; onPress: (
 }
 
 // `onPress` omitted when a pet already exists (slot is a future affordance).
-// `large` blows it up for the centered "no pet yet" state.
-function EmptyDome({ onPress, large }: { onPress?: () => void; large?: boolean }) {
+// `large` blows it up for the centered "no pet yet" state; `waiting` shows the
+// "please wait" copy while the model downloads.
+function EmptyDome({
+  onPress,
+  large,
+  waiting,
+}: {
+  onPress?: () => void;
+  large?: boolean;
+  waiting?: boolean;
+}) {
   const { t } = useTranslation();
   const theme = useTheme();
   const disabled = !onPress;
@@ -92,7 +103,14 @@ function EmptyDome({ onPress, large }: { onPress?: () => void; large?: boolean }
       <View style={styles.plate}>
         <Text style={[styles.name, { color: theme.inkFaint }]}>{t('shelf.empty')}</Text>
         <Text style={[styles.moodText, { color: theme.inkFaint }]}>
-          <PixelIcon name="plus" size={ICON_SIZE.xs} color={theme.inkFaint} /> {t('shelf.hatchOne')}
+          {waiting ? (
+            t('hatch.waiting')
+          ) : (
+            <>
+              <PixelIcon name="plus" size={ICON_SIZE.xs} color={theme.inkFaint} />{' '}
+              {t('shelf.hatchOne')}
+            </>
+          )}
         </Text>
       </View>
     </Pressable>
@@ -106,11 +124,14 @@ type Props = {
 };
 
 export function ShelfScreen({ pet, onEnterPet, onAdopt }: Props) {
-  // hatching is only offered when the slot is free (one-pet MVP)
-  const canAdopt = !pet;
   const { t } = useTranslation();
   const theme = useTheme();
   const surfaces = useSurfaces();
+  const modelReady = useLlmStore((s) => s.status === 'ready');
+  // hatching is offered when the slot is free AND the model has downloaded —
+  // so the first pet is born with a generated personality
+  const waiting = !pet && !modelReady;
+  const canAdopt = !pet && modelReady;
   return (
     <View style={styles.root}>
       <View style={styles.head}>
@@ -131,8 +152,12 @@ export function ShelfScreen({ pet, onEnterPet, onAdopt }: Props) {
             <EmptyDome />
           </View>
         ) : (
-          // no pet yet → a single, larger inviting dome to hatch one
-          <EmptyDome onPress={canAdopt ? onAdopt : undefined} large />
+          // no pet yet → a single inviting dome; while the model downloads it's
+          // disabled and the progress bar shows beneath it
+          <View style={styles.emptyWrap}>
+            <EmptyDome onPress={canAdopt ? onAdopt : undefined} large waiting={waiting} />
+            {waiting && <ModelLoadingBar />}
+          </View>
         )}
       </View>
 
@@ -177,6 +202,12 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  emptyWrap: {
+    alignSelf: 'stretch',
+    alignItems: 'center',
+    gap: SPACING.lg,
+    paddingHorizontal: SPACING.lg,
   },
   row: {
     flexDirection: 'row',

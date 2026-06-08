@@ -39,6 +39,7 @@ const pl: typeof en = {
     meet: 'stworzonko się wykluło',
     line: 'nowe na świecie, a już ma własną duszę.',
     summoning: 'odkrywanie, kim jest…',
+    waiting: 'chwileczkę…',
     sayHello: 'Przywitaj się',
   },
   trait: {

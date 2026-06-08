@@ -30,7 +30,9 @@ async function generateCard(): Promise<Personality | null> {
   const llm = useLlmStore.getState();
   if (llm.status !== 'ready') return null;
   const lang = LANG_NAME[i18n.language] ?? 'English';
-  const raw = await llm.generate(buildPersonalityPrompt(lang), PERSONALITY_CONFIG);
+  const system =
+    'You design a tiny pixel pet. Output ONLY one minified JSON object with the exact requested keys — no prose, no markdown, no code fences. /no_think';
+  const raw = await llm.generate(buildPersonalityPrompt(lang), PERSONALITY_CONFIG, system);
   return raw ? parsePersonality(raw) : null;
 }
 

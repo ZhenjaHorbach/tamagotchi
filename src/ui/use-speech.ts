@@ -8,7 +8,13 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 
 import { REPLY_CONFIG, useLlmStore } from '@/ai/llm-store';
 import { usePersonalityStore } from '@/ai/personality-store';
-import { buildReplyPrompt, modelLanguageName, stripThink, type SpeechEvent } from '@/ai/reply';
+import {
+  buildReplySystem,
+  buildReplyUser,
+  modelLanguageName,
+  stripThink,
+  type SpeechEvent,
+} from '@/ai/reply';
 import i18n from '@/i18n';
 import { usePetStore } from '@/state/pet-store';
 
@@ -73,14 +79,14 @@ export function useSpeech() {
 
       const hoursAway =
         event === 'greet' ? Math.max(0, (Date.now() - pet.lastSeenAt) / HOUR_MS) : 0;
-      const prompt = buildReplyPrompt(
-        card,
+      const system = buildReplySystem(card, modelLanguageName(i18n.language));
+      const user = buildReplyUser(
         { event, hunger: pet.hunger, joy: pet.joy, energy: pet.energy, hoursAway },
-        modelLanguageName(i18n.language),
+        lastLine.current, // steer away from the previous line
       );
 
       // generate the whole reply first; only reveal once it's complete
-      const full = await llm.generate(prompt, REPLY_CONFIG);
+      const full = await llm.generate(user, REPLY_CONFIG, system);
       if (mine !== runId.current) return; // superseded by a newer action
       const line = full ? stripThink(full) : '';
       if (line.length > 0) {

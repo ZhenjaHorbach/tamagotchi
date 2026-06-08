@@ -39,6 +39,7 @@ const es: typeof en = {
     meet: 'ha nacido una criatura',
     line: 'nuevo en el mundo, y ya con alma propia.',
     summoning: 'descubriendo quién es…',
+    waiting: 'un momento…',
     sayHello: 'Saluda',
   },
   trait: {

@@ -53,22 +53,55 @@ export function modelLanguageName(code: string): string {
 }
 
 /**
- * One-line reply prompt. Tiny and concrete — small models follow it best.
- * `/no_think` suppresses Qwen3's reasoning block.
+ * System prompt: the pet's persistent identity, voice and reply rules. Stable
+ * across a pet's life, so it belongs in the system role (better adherence,
+ * and the model stops warning about a missing system prompt).
  */
-export function buildReplyPrompt(p: Personality, ctx: ReplyContext, lang: string): string {
+export function buildReplySystem(p: Personality, lang: string): string {
+  return (
+    `You are ${p.name}, a tiny pixel creature living in a pocket terrarium. ` +
+    `Voice: ${VOICE.temperament(p.temperament)}; ${VOICE.boldness(p.boldness)}. ` +
+    `You sometimes (not always) let this quirk slip out: ${p.quirk}. ` +
+    `Be witty, playful and a little unexpected — like a tiny weird friend, never a polite assistant. ` +
+    `Every reply must be FRESH: new wording, a new little thought, never a line you've said before. ` +
+    `Answer with ONE short punchy sentence (max 12 words), in character, in ${lang}. ` +
+    `No quotes, no narration, no emoji spam. /no_think`
+  );
+}
+
+// rotating "tone" sparks — a different creative angle each call breaks the
+// model out of repeating the same line for the same event
+const SPARKS = [
+  'be cheeky and teasing',
+  'overreact dramatically',
+  'be sweetly affectionate',
+  'make a tiny absurd joke',
+  'be mock-philosophical about it',
+  'act gently smug',
+  'be adorably confused',
+  'sound conspiratorial, like sharing a secret',
+];
+
+function pickSpark(): string {
+  return SPARKS[Math.floor(Math.random() * SPARKS.length)];
+}
+
+/**
+ * User turn: the situational facts + a fresh tone spark, and (optionally) the
+ * last line to steer away from, so repeated actions don't produce repeats.
+ */
+export function buildReplyUser(ctx: ReplyContext, avoid?: string): string {
   const away =
     ctx.hoursAway >= 1 ? ` They were away about ${Math.round(ctx.hoursAway)} hour(s).` : '';
+  const dontRepeat = avoid
+    ? `\nDo NOT reuse or paraphrase your previous line: "${avoid}". Say something different.`
+    : '';
   return (
-    `You are ${p.name}, a tiny pixel pet. ` +
-    `Voice: ${VOICE.temperament(p.temperament)}; ${VOICE.boldness(p.boldness)}. Quirk: ${p.quirk}.\n` +
-    // the action is the headline instruction
     `WHAT JUST HAPPENED: ${EVENT_DIRECTIVE[ctx.event]}${away}\n` +
-    // stats are background colour only
-    `Background mood (do not just list it): hunger ${Math.round(ctx.hunger)}/100, ` +
+    `Background mood (do not just recite numbers): hunger ${Math.round(ctx.hunger)}/100, ` +
     `joy ${Math.round(ctx.joy)}/100, energy ${Math.round(ctx.energy)}/100.\n` +
-    `Reply with ONE short sentence (max 12 words) about WHAT JUST HAPPENED, ` +
-    `in character, in ${lang}. No quotes, no emoji spam. /no_think`
+    `This time, ${pickSpark()}.${dontRepeat}\n` +
+    `Reply about WHAT JUST HAPPENED — one fresh, funny, in-character line.`
   );
 }
 

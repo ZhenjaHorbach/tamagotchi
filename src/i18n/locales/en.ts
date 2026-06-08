@@ -41,6 +41,7 @@ const en = {
     meet: 'a creature has hatched',
     line: 'new to the world, and already its own little soul.',
     summoning: 'discovering who they are…',
+    waiting: 'just a moment…',
     sayHello: 'Say hello',
   },
   trait: {

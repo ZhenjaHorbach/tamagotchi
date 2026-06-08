@@ -5,10 +5,6 @@
 import { LLMModule, models } from 'react-native-executorch';
 import { create } from 'zustand';
 
-/**
- * Qwen3 1.7B — a step up from 0.6B, which streamed ~85 tok/s in the simulator.
- * Bigger download (~2 GB) and more memory use, but should still run on-device in a few seconds and stream at a decent clip.
- */
 const MODEL = models.llm.qwen3_1_7b();
 
 /** Model id straight from the library config, shown in the AI Lab. */
@@ -18,13 +14,24 @@ export const MODEL_LABEL = MODEL.modelName;
 export type GenConfig = {
   temperature?: number;
   topP?: number;
+  minP?: number;
   repetitionPenalty?: number;
 };
 
-// Higher temperature + topP → more varied, original in-character replies.
-export const REPLY_CONFIG: GenConfig = { temperature: 1.0, topP: 0.95, repetitionPenalty: 1.1 };
+// High temperature for variety; minP trims the incoherent long tail so the
+// extra randomness stays funny rather than gibberish.
+export const REPLY_CONFIG: GenConfig = {
+  temperature: 1.1,
+  topP: 0.95,
+  minP: 0.03,
+  repetitionPenalty: 1.1,
+};
 // Lower temperature → the birth JSON parses reliably (still some name/quirk flair).
 export const PERSONALITY_CONFIG: GenConfig = { temperature: 0.7, topP: 0.9 };
+
+// fallback system prompt (e.g. AI Lab free chat) so the model always gets one
+const DEFAULT_SYSTEM =
+  'You are a tiny pixel pet living in a pocket terrarium. Keep replies short, warm and in character. /no_think';
 
 export type GenMetrics = {
   /** ms from generate() to the first streamed token */
@@ -50,7 +57,7 @@ type LlmStore = {
   /** Download (once) and load the model. Safe to call repeatedly. */
   load: () => Promise<void>;
   /** Stream a reply for a single user prompt. Resolves with the full text. */
-  generate: (prompt: string, config?: GenConfig) => Promise<string | null>;
+  generate: (prompt: string, config?: GenConfig, system?: string) => Promise<string | null>;
   interrupt: () => void;
 };
 
@@ -92,13 +99,16 @@ export const useLlmStore = create<LlmStore>((set, get) => ({
     }
   },
 
-  generate: async (prompt: string, config?: GenConfig) => {
+  generate: async (prompt: string, config?: GenConfig, system?: string) => {
     if (!llm || get().generating) return null;
     timing = { startedAt: Date.now(), firstTokenAt: 0, tokens: 0 };
     set({ generating: true, rawResponse: '', metrics: EMPTY_METRICS });
     try {
       if (config) llm.configure({ generationConfig: config });
-      const text = await llm.generate([{ role: 'user', content: prompt }]);
+      const text = await llm.generate([
+        { role: 'system', content: system ?? DEFAULT_SYSTEM },
+        { role: 'user', content: prompt },
+      ]);
       const totalMs = Date.now() - timing.startedAt;
       const genMs = timing.firstTokenAt ? Date.now() - timing.firstTokenAt : totalMs;
       set({

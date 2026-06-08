@@ -50,10 +50,10 @@ function Led() {
 
 function Screw({ corner }: { corner: 'tl' | 'tr' | 'bl' | 'br' }) {
   const pos: Record<string, object> = {
-    tl: { top: 14, left: 14 },
-    tr: { top: 14, right: 14 },
-    bl: { bottom: 14, left: 14 },
-    br: { bottom: 14, right: 14 },
+    tl: { top: 18, left: 18 },
+    tr: { top: 18, right: 18 },
+    bl: { bottom: 18, left: 18 },
+    br: { bottom: 18, right: 18 },
   };
   return <View style={[styles.screw, { backgroundColor: PLASTIC.toyScrew }, pos[corner]]} />;
 }
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     gap: SPACING.lg,
     paddingTop: SPACING.lg,
     paddingBottom: SPACING.sm,
-    paddingHorizontal: SPACING.sm,
+    paddingHorizontal: SPACING.xl,
   },
   grille: {
     gap: SPACING.xxs,
