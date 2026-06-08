@@ -5,6 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-na
 
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
+import { useSettingsStore } from '@/state/settings-store';
 import {
   BORDER_WIDTH,
   FONT_SIZE,
@@ -85,8 +86,10 @@ export function SettingsScreen({ name, onReset, onOpenAiLab, onOpenLanguage }: P
   const { t } = useTranslation();
   const theme = useTheme();
   const surfaces = useSurfaces();
-  const [notif, setNotif] = useState(true);
-  const [sound, setSound] = useState(true);
+  const sound = useSettingsStore((s) => s.sound);
+  const setSound = useSettingsStore((s) => s.setSound);
+  const notif = useSettingsStore((s) => s.reminders);
+  const setNotif = useSettingsStore((s) => s.setReminders);
   const [about, setAbout] = useState(false);
   const [armed, setArmed] = useState(false);
   const disarm = useRef<ReturnType<typeof setTimeout> | null>(null);

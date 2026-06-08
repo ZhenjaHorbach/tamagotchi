@@ -9,6 +9,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 
+import { playSfx } from '@/audio/sfx';
 import { PixelIcon } from '@/render/pixel-icon';
 import type { IconName } from '@/render/pixel-bitmaps';
 import {
@@ -89,7 +90,10 @@ function HardwareButton({ icon, label, onPress, active, disabled }: HardwareActi
   return (
     <Pressable
       style={[styles.hw, disabled && styles.hwDisabled]}
-      onPress={onPress}
+      onPress={() => {
+        playSfx('tap');
+        onPress();
+      }}
       disabled={disabled}
       onPressIn={() => setPressed(true)}
       onPressOut={() => setPressed(false)}

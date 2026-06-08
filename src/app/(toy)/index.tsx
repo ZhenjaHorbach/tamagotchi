@@ -15,7 +15,8 @@ import { hashSeed } from '@/render/sprite-gen';
 import { SpeechBubble } from '@/ui/components/speech-bubble';
 import { StatGauge } from '@/ui/components/stat-gauge';
 import { usePetName } from '@/ai/personality-store';
-import { useSpeech, type SpeechEvent } from '@/ui/use-speech';
+import { useSpeech } from '@/ui/use-speech';
+import { playSfx } from '@/audio/sfx';
 import { buttonTones, gaugeTones, SPACING, useSurfaces } from '@/ui/theme';
 
 export default function HabitatScreen() {
@@ -35,6 +36,7 @@ export default function HabitatScreen() {
   // greet whenever the habitat is (re)entered
   useFocusEffect(
     useCallback(() => {
+      playSfx('greet');
       speak('greet');
     }, [speak]),
   );
@@ -55,7 +57,15 @@ export default function HabitatScreen() {
   const fullness = 100 - pet.hunger;
   const tooTired = mood === 'sleepy';
 
-  const speakFor = (event: SpeechEvent, capped: boolean) => speak(capped ? 'camera' : event);
+  const act = async (
+    event: 'feed' | 'play' | 'sleep',
+    capped: boolean,
+    run: () => Promise<void>,
+  ) => {
+    playSfx(capped ? 'camera' : event);
+    if (!capped) await run();
+    speak(capped ? 'camera' : event);
+  };
 
   return (
     <View style={styles.home}>
@@ -97,44 +107,20 @@ export default function HabitatScreen() {
           icon="bowl"
           label={t('habitat.feed')}
           tone={buttons.feed}
-          onPress={async () => {
-            const capped = pet.hunger <= 100 - BUTTON_CAP;
-            if (capped) {
-              speakFor('feed', capped);
-              return;
-            }
-            await feed();
-            speakFor('feed', capped);
-          }}
+          onPress={() => act('feed', Math.round(pet.hunger) <= 100 - BUTTON_CAP, feed)}
         />
         <ChunkyButton
           icon="ball"
           label={t('habitat.play')}
           tone={buttons.play}
           disabled={tooTired}
-          onPress={async () => {
-            const capped = pet.joy >= BUTTON_CAP;
-            if (capped) {
-              speakFor('play', capped);
-              return;
-            }
-            await play();
-            speakFor('play', capped);
-          }}
+          onPress={() => act('play', Math.round(pet.joy) >= BUTTON_CAP, play)}
         />
         <ChunkyButton
           icon="moon"
           label={t('habitat.sleep')}
           tone={buttons.sleep}
-          onPress={async () => {
-            const capped = pet.energy >= BUTTON_CAP;
-            if (capped) {
-              speakFor('sleep', capped);
-              return;
-            }
-            await sleep();
-            speakFor('sleep', capped);
-          }}
+          onPress={() => act('sleep', Math.round(pet.energy) >= BUTTON_CAP, sleep)}
         />
       </View>
     </View>
