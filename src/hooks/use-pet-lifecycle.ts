@@ -3,7 +3,9 @@ import { AppState } from 'react-native';
 
 import { useLlmStore } from '@/ai/llm-store';
 import { usePersonalityStore } from '@/ai/personality-store';
+import { useVisionStore } from '@/ai/vision-store';
 import { usePetStore } from '@/state/pet-store';
+import { useSettingsStore } from '@/state/settings-store';
 
 /**
  * App-level pet heartbeat: bootstrap from SQLite on mount, re-apply elapsed
@@ -17,11 +19,17 @@ export function usePetLifecycle() {
   const ensurePersonality = usePersonalityStore((s) => s.ensure);
   const loadModel = useLlmStore((s) => s.load);
   const modelReady = useLlmStore((s) => s.status === 'ready');
+  const loadVision = useVisionStore((s) => s.load);
+  const cameraEnabled = useSettingsStore((s) => s.camera);
 
   useEffect(() => {
     bootstrap();
     loadModel();
   }, [bootstrap, loadModel]);
+
+  useEffect(() => {
+    if (cameraEnabled && modelReady) loadVision();
+  }, [cameraEnabled, modelReady, loadVision]);
 
   useEffect(() => {
     const subscription = AppState.addEventListener('change', (state) => {

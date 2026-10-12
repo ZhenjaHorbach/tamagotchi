@@ -36,10 +36,11 @@ function Zzz() {
   );
 }
 
-export function PetSlot({ mood, seed }: { mood: Mood; seed: number }) {
+export function PetSlot({ mood, seed, size = SIZE }: { mood: Mood; seed: number; size?: number }) {
   const theme = useTheme();
   const asleep = mood === 'sleepy';
   const t = useSharedValue(0);
+  const k = size / SIZE; // scale aura/shadow with the sprite
 
   useEffect(() => {
     t.value = 0;
@@ -64,14 +65,14 @@ export function PetSlot({ mood, seed }: { mood: Mood; seed: number }) {
 
   return (
     <View style={styles.root} pointerEvents="none">
-      <View style={styles.aura}>
+      <View style={[styles.aura, { width: 150 * k, height: 150 * k, top: -20 * k }]}>
         <RadialBg colors={[theme.glow, fadeOut(theme.glow)]} radius={0.5} positions={[0, 0.66]} />
       </View>
       <Animated.View style={bob}>
-        <SpritePlayer mood={mood} seed={seed} size={SIZE} />
+        <SpritePlayer mood={mood} seed={seed} size={size} />
         {asleep && <Zzz />}
       </Animated.View>
-      <Animated.View style={[styles.shadow, shadow]} />
+      <Animated.View style={[styles.shadow, { width: 74 * k, height: 13 * k }, shadow]} />
     </View>
   );
 }

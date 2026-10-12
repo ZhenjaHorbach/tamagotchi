@@ -1,6 +1,15 @@
 import { create } from 'zustand';
 
-import { applyElapsed, createPet, feed, play, sleep, type PetState } from '@/core';
+import {
+  applyElapsed,
+  createPet,
+  feed,
+  play,
+  reactToSight,
+  sleep,
+  type PetState,
+  type SightVerdict,
+} from '@/core';
 import { currentModifiers, usePersonalityStore } from '@/ai/personality-store';
 import { clearPet, getPet, savePet } from '@/db/pet-repo';
 import { clearPersonality } from '@/db/personality-repo';
@@ -13,6 +22,8 @@ type PetStore = {
   feed: () => Promise<void>;
   play: () => Promise<void>;
   sleep: () => Promise<void>;
+  /** The camera "show me" reaction — verdict from the pet's personality; food fills the belly. */
+  react: (verdict: SightVerdict, isFood?: boolean) => Promise<void>;
   /** Give birth to a new pet (the hatch ceremony's payoff). */
   hatch: () => Promise<void>;
   /** Say goodbye: forget the pet and its personality. Leaves no pet. */
@@ -51,6 +62,7 @@ export const usePetStore = create<PetStore>((set, get) => {
     feed: () => commit((s, mods) => feed(s, mods)),
     play: () => commit((s, mods) => play(s, mods)),
     sleep: () => commit((s) => sleep(s)),
+    react: (verdict, isFood = false) => commit((s) => reactToSight(s, verdict, isFood)),
 
     hatch: async () => {
       const pet = createPet(Date.now());

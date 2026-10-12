@@ -51,6 +51,17 @@ export const REPLY_CONFIG: GenConfig = {
 // Lower temperature → the birth JSON parses reliably (still some name/quirk flair).
 export const PERSONALITY_CONFIG: GenConfig = { temperature: 0.7, topP: 0.9 };
 
+// Camera reaction returns JSON {verdict, food, line}. A tiny model degenerates
+// (repeated tokens, "&amp;amp;…") at high temperature, so keep it calmer and
+// lean harder on the repetition penalty + minP to stay coherent.
+export const SIGHT_CONFIG: GenConfig = {
+  temperature: 0.7,
+  topP: 0.9,
+  minP: 0.05,
+  repetitionPenalty: 1.3,
+  maxTokens: 96,
+};
+
 // fallback system prompt (e.g. AI Lab free chat) so the model always gets one
 const DEFAULT_SYSTEM =
   'You are a tiny pixel pet living in a pocket terrarium. Keep replies short, warm and in character. /no_think';

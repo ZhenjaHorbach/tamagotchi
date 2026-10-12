@@ -3,7 +3,7 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { BUTTON_CAP, deriveMood } from '@/core';
 import { usePetStore } from '@/state/pet-store';
@@ -17,7 +17,18 @@ import { StatGauge } from '@/ui/components/stat-gauge';
 import { usePetName } from '@/ai/personality-store';
 import { useSpeech } from '@/ui/use-speech';
 import { playSfx } from '@/audio/sfx';
-import { buttonTones, gaugeTones, SPACING, useSurfaces } from '@/ui/theme';
+import { PixelIcon } from '@/render/pixel-icon';
+import { useSettingsStore } from '@/state/settings-store';
+import {
+  BORDER_WIDTH,
+  buttonTones,
+  gaugeTones,
+  ICON_SIZE,
+  RADIUS,
+  SPACING,
+  useSurfaces,
+  useTheme,
+} from '@/ui/theme';
 
 export default function HabitatScreen() {
   const { t } = useTranslation();
@@ -30,6 +41,8 @@ export default function HabitatScreen() {
   const sleep = usePetStore((s) => s.sleep);
 
   const { speak, speech } = useSpeech();
+  const theme = useTheme();
+  const cameraEnabled = useSettingsStore((s) => s.camera);
   const gauges = gaugeTones();
   const buttons = buttonTones();
 
@@ -71,6 +84,22 @@ export default function HabitatScreen() {
     <View style={styles.home}>
       <View style={styles.topbar}>
         <Nameplate name={name} mood={mood} onPress={() => router.push('/card')} />
+        {cameraEnabled && (
+          <Pressable
+            onPress={() => {
+              playSfx('tap');
+              router.push('/camera');
+            }}
+            style={({ pressed }) => [
+              styles.camFab,
+              { backgroundColor: theme.panel, borderColor: theme.panelLine },
+              pressed && { backgroundColor: theme.accentSoft },
+            ]}
+            accessibilityLabel={t('camera.shutterA11y', { name })}
+          >
+            <PixelIcon name="camera" size={ICON_SIZE.md} color={theme.accent} />
+          </Pressable>
+        )}
       </View>
 
       <SpeechBubble
@@ -135,7 +164,16 @@ const styles = StyleSheet.create({
   },
   topbar: {
     flexDirection: 'row',
+    alignItems: 'stretch',
     gap: SPACING.sm,
+  },
+  camFab: {
+    width: 46,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: SPACING.md,
+    borderRadius: RADIUS.md,
+    borderWidth: BORDER_WIDTH.hairline,
   },
   statRow: {
     gap: SPACING.sm,

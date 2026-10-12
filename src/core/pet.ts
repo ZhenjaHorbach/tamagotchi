@@ -5,6 +5,9 @@ import {
   HOUR_MS,
   MOOD_THRESHOLDS,
   NEWBORN_STATS,
+  SIGHT_EFFECT,
+  SIGHT_FOOD_HUNGER,
+  type SightVerdict,
 } from './constants';
 import { NEUTRAL_MODIFIERS, type Modifiers } from './traits';
 import type { Mood, PetState } from './types';
@@ -87,5 +90,22 @@ export function sleep(s: PetState): PetState {
   return {
     ...s,
     energy: raiseCapped(s.energy, ACTION_EFFECTS.sleep.energy),
+  };
+}
+
+/**
+ * The camera "show me" reaction. Verdict (love/meh/dislike) is decided from the
+ * pet's personality by the model. Unlike the buttons this is NOT capped at
+ * BUTTON_CAP — a loved sight is how stats reach 100%; a disliked one stings.
+ * When the shown thing is edible (`isFood`), it also moves the belly: loved food
+ * fills it up, disliked food turns the stomach a little.
+ */
+export function reactToSight(s: PetState, verdict: SightVerdict, isFood = false): PetState {
+  const e = SIGHT_EFFECT[verdict];
+  return {
+    ...s,
+    joy: clamp(s.joy + e.joy),
+    energy: clamp(s.energy + e.energy),
+    hunger: isFood ? clamp(s.hunger + SIGHT_FOOD_HUNGER[verdict]) : s.hunger,
   };
 }

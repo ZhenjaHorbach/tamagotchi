@@ -12,6 +12,7 @@ import {
   buildReplySystem,
   buildReplyUser,
   modelLanguageName,
+  sanitizeLine,
   stripThink,
   type SpeechEvent,
 } from '@/ai/reply';
@@ -88,7 +89,7 @@ export function useSpeech() {
       // generate the whole reply first; only reveal once it's complete
       const full = await llm.generate(user, REPLY_CONFIG, system);
       if (mine !== runId.current) return; // superseded by a newer action
-      const line = full ? stripThink(full) : '';
+      const line = full ? sanitizeLine(stripThink(full)) : '';
       if (line.length > 0) {
         lastLine.current = line;
         reveal(line);

@@ -7,8 +7,7 @@ import { usePetLifecycle } from '@/hooks/use-pet-lifecycle';
 
 export default function RootLayout() {
   usePetLifecycle();
-  const fontsLoaded = useAppFonts();
+  useAppFonts();
 
-  if (!fontsLoaded) return null;
   return <Stack screenOptions={{ headerShown: false }} />;
 }

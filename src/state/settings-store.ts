@@ -10,9 +10,10 @@ const KEY = 'settings.v1';
 type Prefs = {
   sound: boolean;
   reminders: boolean;
+  camera: boolean;
 };
 
-const DEFAULTS: Prefs = { sound: true, reminders: true };
+const DEFAULTS: Prefs = { sound: true, reminders: true, camera: true };
 
 function load(): Prefs {
   try {
@@ -35,6 +36,7 @@ function persist(p: Prefs) {
 type SettingsStore = Prefs & {
   setSound: (v: boolean) => void;
   setReminders: (v: boolean) => void;
+  setCamera: (v: boolean) => void;
 };
 
 export const useSettingsStore = create<SettingsStore>((set) => ({
@@ -50,6 +52,12 @@ export const useSettingsStore = create<SettingsStore>((set) => ({
       const next = { ...s, reminders: v };
       persist(next);
       return { reminders: v };
+    }),
+  setCamera: (v) =>
+    set((s) => {
+      const next = { ...s, camera: v };
+      persist(next);
+      return { camera: v };
     }),
 }));
 

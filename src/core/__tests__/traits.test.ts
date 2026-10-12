@@ -69,10 +69,11 @@ describe('modifiers affect the core', () => {
     expect(fed.hunger).toBeCloseTo(80 + ACTION_EFFECTS.feed.hunger * 1.3);
   });
 
-  it('scales Play energy cost, and joy gain is still capped', () => {
+  it('scales Play energy cost and joy gain (joy never exceeds the cap)', () => {
     const energetic: Modifiers = { ...NEUTRAL_MODIFIERS, playEnergyCost: 0.7, playJoyGain: 1.5 };
     const played = play({ ...createPet(T0), joy: 50, energy: 50 }, energetic);
-    expect(played.joy).toBeCloseTo(BUTTON_CAP); // 50 + 10*1.5 = 65 → capped at 60
+    // scaled gain, but raiseCapped never lets joy pass BUTTON_CAP
+    expect(played.joy).toBeCloseTo(Math.min(50 + ACTION_EFFECTS.play.joy * 1.5, BUTTON_CAP));
     expect(played.energy).toBeCloseTo(50 + ACTION_EFFECTS.play.energy * 0.7);
   });
 });

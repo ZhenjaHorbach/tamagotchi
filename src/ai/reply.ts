@@ -2,7 +2,7 @@
 // and handed to the model as ready values — it phrases them, never invents
 // numbers (spec). Pure prompt builder + helpers, so they're testable.
 
-import { BOLDNESS, TEMPERAMENTS } from '@/core';
+import { BOLDNESS, TEMPERAMENTS, type SightVerdict } from '@/core';
 
 import type { Personality } from './personality';
 
@@ -107,6 +107,115 @@ export function buildReplyUser(ctx: ReplyContext, avoid?: string): string {
     `This time, ${pickSpark()}.${dontRepeat}\n` +
     `Reply about WHAT JUST HAPPENED — one fresh, funny, in-character line.`
   );
+}
+
+export type SightReaction = { verdict: SightVerdict; food: boolean; line: string };
+
+/**
+ * System prompt for the camera reaction. The pet judges a thing shown to it
+ * against its own tastes, then voices it — so it outputs BOTH a verdict (drives
+ * the stat change) and one in-character line, as a single minified JSON object.
+ */
+export function buildSightSystem(p: Personality, lang: string): string {
+  return (
+    `You are ${p.name}, a tiny pixel creature living in a pocket terrarium. ` +
+    `Voice: ${VOICE.temperament(p.temperament)}; ${VOICE.boldness(p.boldness)}. ` +
+    `You sometimes (not always) let this quirk slip out: ${p.quirk}. ` +
+    `Your human points a camera at the real world and shows you things. ` +
+    `Judge each thing by YOUR taste: "love" if it's something you adore (or its kind), ` +
+    `"dislike" if it's something you can't stand, otherwise "meh". ` +
+    `Then react in character — witty, playful, a little unexpected, never a polite assistant. ` +
+    `Also say whether the thing is edible food ("food": true) or not ("food": false). ` +
+    `Output ONLY one minified JSON object: {"verdict":"love"|"meh"|"dislike",` +
+    `"food":true|false,"line":"<one short punchy sentence, max 14 words, in ${lang}>"}. ` +
+    `No other text, no markdown. /no_think`
+  );
+}
+
+/**
+ * User turn for a sight: the recognized thing plus the pet's tastes, so the
+ * model can decide love/meh/dislike. `avoid` steers away from the last line.
+ */
+export function buildSightUser(
+  label: string,
+  likes: string[],
+  dislikes: string[],
+  avoid?: string,
+): string {
+  const dontRepeat = avoid
+    ? `\nDo NOT reuse or paraphrase your previous line: "${avoid}".`
+    : '';
+  return (
+    `Your human just showed you, through the camera, a real ${label}.\n` +
+    `You LOVE: ${likes.join(', ') || '(no strong loves)'}. ` +
+    `You DISLIKE: ${dislikes.join(', ') || '(no strong dislikes)'}.\n` +
+    `Consider categories — e.g. broccoli counts as a vegetable, a puppy as an animal.\n` +
+    `This time, ${pickSpark()}.${dontRepeat}\n` +
+    `React to the ${label}: return the JSON {"verdict","food","line"}.`
+  );
+}
+
+/** Extract the first balanced {…} object from model text (tolerant of prose). */
+function extractJsonObject(text: string): string | null {
+  const start = text.indexOf('{');
+  if (start < 0) return null;
+  let depth = 0;
+  for (let i = start; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}' && --depth === 0) return text.slice(start, i + 1);
+  }
+  return null;
+}
+
+/**
+ * Tidy a model line: decode escaped entities a tiny model loves to emit
+ * (&amp;amp;…), collapse runaway repeated characters and words. Returns '' when
+ * the result is degenerate (almost no letters, or absurdly long) so the caller
+ * falls back to a clean canned line instead of showing gibberish.
+ */
+export function sanitizeLine(s: string): string {
+  let t = s.trim();
+  // decode nested HTML entities (&amp;amp; → &)
+  for (let i = 0; i < 4; i++) {
+    t = t
+      .replace(/&amp;/gi, '&')
+      .replace(/&lt;/gi, '<')
+      .replace(/&gt;/gi, '>')
+      .replace(/&quot;/gi, '"')
+      .replace(/&#0?39;/g, "'");
+  }
+  t = t
+    .replace(/(.)\1{2,}/g, '$1$1') // 3+ identical chars → 2
+    .replace(/\b(\w+)(\s+\1\b){1,}/gi, '$1') // repeated words → one
+    .replace(/\s{2,}/g, ' ')
+    // strip leading/trailing symbol junk (keep sentence punctuation at the end)
+    .replace(/^[^\p{L}\p{N}]+/u, '')
+    .replace(/[^\p{L}\p{N}.!?…)"']+$/u, '')
+    .trim();
+  const letters = (t.match(/\p{L}/gu) ?? []).length;
+  if (letters < 3 || t.length > 200) return ''; // looks degenerate
+  return t;
+}
+
+/**
+ * Parse the model's sight JSON into a verdict + line. Returns null when the
+ * output can't be trusted (caller falls back to a neutral canned reaction).
+ */
+export function parseSight(raw: string): SightReaction | null {
+  const json = extractJsonObject(stripThink(raw));
+  if (!json) return null;
+  try {
+    const obj = JSON.parse(json) as { verdict?: unknown; food?: unknown; line?: unknown };
+    const verdict = String(obj.verdict).toLowerCase();
+    const line = typeof obj.line === 'string' ? sanitizeLine(obj.line) : '';
+    const food = obj.food === true || obj.food === 'true';
+    if ((verdict === 'love' || verdict === 'meh' || verdict === 'dislike') && line) {
+      return { verdict, food, line };
+    }
+  } catch {
+    // malformed JSON → caller falls back
+  }
+  return null;
 }
 
 /**

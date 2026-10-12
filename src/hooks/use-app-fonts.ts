@@ -12,7 +12,7 @@ import { useEffect } from 'react';
 
 SplashScreen.preventAutoHideAsync();
 
-export function useAppFonts(): boolean {
+export function useAppFonts() {
   const [fontsLoaded] = useFonts({
     PixelifySans_500Medium,
     PixelifySans_700Bold,
@@ -27,6 +27,4 @@ export function useAppFonts(): boolean {
   useEffect(() => {
     if (fontsLoaded) SplashScreen.hideAsync();
   }, [fontsLoaded]);
-
-  return fontsLoaded;
 }

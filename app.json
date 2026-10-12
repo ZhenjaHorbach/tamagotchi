@@ -48,7 +48,15 @@
         }
       ],
       "expo-localization",
-      "expo-audio"
+      "expo-audio",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Show $(PRODUCT_NAME) the world around you so your pet can react to what it sees.",
+          "microphonePermission": false,
+          "recordAudioAndroid": false
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

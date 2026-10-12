@@ -22,6 +22,30 @@ export const ACTION_EFFECTS = {
   sleep: { energy: +10 },
 } as const;
 
+/**
+ * Camera "show me" reaction. How the pet feels about a thing shown to it depends
+ * on its personality (likes vs dislikes), so the verdict comes from the model.
+ * A loved sight is the ONLY source allowed to lift stats past the button cap
+ * toward 100%; a disliked one actually hurts.
+ *   love    → big joy + a jolt of excitement (uncapped)
+ *   meh     → a tiny polite bump
+ *   dislike → grossed out: joy and energy dip
+ */
+export const SIGHT_EFFECT = {
+  love: { joy: +30, energy: +10 },
+  meh: { joy: +5, energy: 0 },
+  dislike: { joy: -20, energy: -5 },
+} as const;
+
+/**
+ * When the shown thing is edible, it also moves the belly (hunger). Loved food
+ * fills it up (negative hunger), disliked food turns the stomach a little. The
+ * camera is the uncapped path, so loved food can top the belly all the way off.
+ */
+export const SIGHT_FOOD_HUNGER = { love: -25, meh: -8, dislike: +15 } as const;
+
+export type SightVerdict = keyof typeof SIGHT_EFFECT;
+
 /** Stats of a newborn pet. */
 export const NEWBORN_STATS = {
   hunger: 20,

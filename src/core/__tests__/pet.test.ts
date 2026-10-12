@@ -128,8 +128,8 @@ describe('actions', () => {
     expect(sleep(makePet({ energy: 50 })).energy).toBe(50 + ACTION_EFFECTS.sleep.energy);
   });
 
-  // buttons can lift a good stat only up to BUTTON_CAP — 60→100 is the camera's job
-  describe('button cap (max 60% via buttons)', () => {
+  // buttons can lift a good stat only up to BUTTON_CAP — the rest is the camera's job
+  describe('button cap (buttons cannot exceed BUTTON_CAP)', () => {
     it('sleep cannot push energy past the cap', () => {
       expect(sleep(makePet({ energy: BUTTON_CAP - 5 })).energy).toBe(BUTTON_CAP);
     });
@@ -140,7 +140,8 @@ describe('actions', () => {
       expect(play(makePet({ joy: BUTTON_CAP - 5 })).joy).toBe(BUTTON_CAP);
     });
     it('feed cannot lower hunger past the fullness cap (100 − cap)', () => {
-      expect(feed(makePet({ hunger: 45 })).hunger).toBe(100 - BUTTON_CAP);
+      // start just above the floor so a single feed pins exactly to it
+      expect(feed(makePet({ hunger: 100 - BUTTON_CAP + 5 })).hunger).toBe(100 - BUTTON_CAP);
     });
     it('feed leaves an already-full pet untouched', () => {
       expect(feed(makePet({ hunger: 10 })).hunger).toBe(10);

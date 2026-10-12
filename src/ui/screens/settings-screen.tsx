@@ -90,6 +90,8 @@ export function SettingsScreen({ name, onReset, onOpenAiLab, onOpenLanguage }: P
   const setSound = useSettingsStore((s) => s.setSound);
   const notif = useSettingsStore((s) => s.reminders);
   const setNotif = useSettingsStore((s) => s.setReminders);
+  const camera = useSettingsStore((s) => s.camera);
+  const setCamera = useSettingsStore((s) => s.setCamera);
   const [about, setAbout] = useState(false);
   const [armed, setArmed] = useState(false);
   const disarm = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -149,6 +151,14 @@ export function SettingsScreen({ name, onReset, onOpenAiLab, onOpenLanguage }: P
           sub={t('settings.soundSub')}
           value={sound}
           onChange={setSound}
+        />
+        <View style={[styles.divider, { backgroundColor: theme.panelLine }]} />
+        <SetToggleRow
+          icon="camera"
+          title={t('settings.camera')}
+          sub={t('settings.cameraSub', { name })}
+          value={camera}
+          onChange={setCamera}
         />
       </View>
 
